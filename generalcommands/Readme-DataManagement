@@ -1,0 +1,36 @@
+The dataset generated using custom script "Generate.py" from ROS.
+
+Configuration:
+Gazebo:
+Scene>shadows> turn to false.
+
+Camera:
+Kinect camera mounted on head of baxter.
+
+Generated dataset:
+Baxter images (JPG) and proprioseptions (TXT).
+
+
+Proprioseption file name format:
+todaydate_counter_proprioseption.header.stamp.secs
+
+Robot image file name format:
+todaydate_counter_image.header.stamp.secs
+
+Folders orgnization as follow:
+DateofDataCaptured/baxter/ contains baxter images of left hand, right hand, both hands, left with environment, rigth with environemnt, both with environment.
+
+DateofDataCaptured/env/ contains images of different possible environment.
+
+Commands to start the environment and capture:
+roslaunch baxter_gazebo baxter_world.launch
+rosrun baxter_tools enable_robot.py -e
+rosrun baxter_interface joint_trajectory_action_server.py
+roslaunch baxter_moveit_config demo_baxter.launch load_robot_description:=true right_electric_gripper:=true left_electric_gripper:=true
+run the generate.py script
+
+I used:
+To check the live proprioseptions:
+	rostopic echo /robot/joint_states 
+To check the image take:
+	camera rostopic
