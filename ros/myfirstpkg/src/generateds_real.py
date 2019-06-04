@@ -28,12 +28,10 @@ if __name__ == '__main__':
     # rate = rospy.Rate(.5) # 10hz
     def callback(image, proprioseption, moving, disparityimage):
         try:
-            st = yaml.load(str(moving))
-            status1 = st["status_list"][0]['status']
-            status2 = st["status_list"][1]['status']
+            status1 = moving.status_list[0].status
+            status2 = moving.status_list[1].status
         except IndexError:
             status2 = 0
-
         if ((status1 == 4) and (status2 == 3)) or ((status1 == 3) and (status2 == 3)) or ((status1 == 3) and (status2 == 0)):
             global counter
             counter +=1
