@@ -35,10 +35,10 @@ if __name__ == '__main__':
         if ((status1 == 4) and (status2 == 3)) or ((status1 == 3) and (status2 == 3)) or ((status1 == 3) and (status2 == 0)):
             global counter
             counter +=1
-            x = proprioseption
             print("Image are capturing...{}".format(counter))
-            with open("./dataset/pro/{}_pro{}_{}.txt".format(todaydate, counter, proprioseption.header.stamp.secs), 'wb') as intofile:
-                intofile.write(str(x))
+            with open("./dataset/pro/{}_pro{}_{}.yaml".format(todaydate, counter, proprioseption.header.stamp.secs), 'wb') as intofile:
+                yaml.dump(proprioseption, intofile, Dumper=Dumper)
+
             try:
                 cv_image = bridge.imgmsg_to_cv2(image, "bgr8")
             except CvBridgeError as e:
