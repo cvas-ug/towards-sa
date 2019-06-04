@@ -41,29 +41,13 @@ if __name__ == '__main__':
             print("Image are capturing...{}".format(counter))
             with open("./dataset/pro/{}_pro{}_{}.txt".format(todaydate, counter, proprioseption.header.stamp.secs), 'wb') as intofile:
                 intofile.write(str(x))
-            #pickle-----------------
-            #with open(config_dictionary_file, 'wb') as config_dictionary_file:
-            #    pickle.dump(config_dictionary, config_dictionary_file)
-            #-----------------------
-            #cv_disparityimage = bridge.imgmsg_to_cv2(disparityimage.image, "32FC1") #"8UC1")
-            #cv2.imshow("image window", cv_disparityimage)
-            #csv--------------------
-            #with open(config_dictionary_file,'wb') as fileobj:
-            #    newFile = csv.writer(fileobj)
-            #    newFile.writerow([config_dictionary])
-            #-------------------
-            #oldway-------------
-            #newFile = open(config_dictionary_file,'w')
-            #newFile.write(str(config_dictionary))
-            #newFile.close()
-            #-------------------
             try:
                 cv_image = bridge.imgmsg_to_cv2(image, "bgr8")
             except CvBridgeError as e:
                 print(e)    
             cv2.imwrite("./dataset/images/{}_image{}_{}.jpg".format(todaydate, counter, image.header.stamp.secs), cv_image)
             #cv2.imwrite("./dataset/images_disparity/{}_image{}_{}.png".format(todaydate, counter, image.header.stamp.secs), cv_disparityimage)
-            #yaml---------------
+        
             disparity_file = './dataset/images_disparity/{}_pro{}_{}.yaml'.format(todaydate, counter, proprioseption.header.stamp.secs)
             with open(disparity_file, 'w') as outfile:
                 yaml.dump(disparityimage, outfile, Dumper=Dumper)
@@ -85,10 +69,3 @@ if __name__ == '__main__':
     ts = message_filters.ApproximateTimeSynchronizer([image_sub, info_sub, active_sub, disparityimage_sub], queue_size=10, slop=0.1)
     ts.registerCallback(callback)
     rospy.spin()
-
-#Baseline - no disparity capturing 4sec for 20 images - 10sec for 50 images
-#csv 14sec for 20images
-#pickle 5.5 for 20images - 15s for 50 images
-#oldway  11 for 20 images
-#YAML 20 FOR 3 images only.
-#YAML cdump 5 for 20 images. - 10s for 50 images - winner
