@@ -46,7 +46,7 @@ if __name__ == '__main__':
             cv2.imwrite("./dataset/images/{}_image{}_{}.jpg".format(todaydate, counter, image.header.stamp.secs), cv_image)
             #cv2.imwrite("./dataset/images_disparity/{}_image{}_{}.png".format(todaydate, counter, image.header.stamp.secs), cv_disparityimage)
         
-            disparity_file = './dataset/images_disparity/{}_pro{}_{}.yaml'.format(todaydate, counter, proprioseption.header.stamp.secs)
+            disparity_file = './dataset/images_disparity/{}_disparity{}_{}.yaml'.format(todaydate, counter, proprioseption.header.stamp.secs)
             with open(disparity_file, 'w') as outfile:
                 yaml.dump(disparityimage, outfile, Dumper=Dumper)
             #with open(disparity_file, 'r') as inputfile:
