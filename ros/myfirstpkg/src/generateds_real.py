@@ -26,7 +26,7 @@ todaydate = (dt.date.today()).strftime('%Y%m%d')
 if __name__ == '__main__':
     rospy.init_node('baxter_tf_listener')
     # rate = rospy.Rate(.5) # 10hz
-    def callback(image, proprioseption, moving, disparityimage):
+    def callback(image_right, image_left, proprioseption, moving, disparityimage):
         try:
             status1 = moving.status_list[0].status
             status2 = moving.status_list[1].status
@@ -40,13 +40,15 @@ if __name__ == '__main__':
                 yaml.dump(proprioseption, intofile, Dumper=Dumper)
 
             try:
-                cv_image = bridge.imgmsg_to_cv2(image, "bgr8")
+                cv_image_right = bridge.imgmsg_to_cv2(image_right, "bgr8")
+                cv_image_left = bridge.imgmsg_to_cv2(image_left, "bgr8")
             except CvBridgeError as e:
                 print(e)    
-            cv2.imwrite("./dataset/images/{}_image{}_{}.jpg".format(todaydate, counter, image.header.stamp.secs), cv_image)
+            cv2.imwrite("./dataset/images_right/{}_image{}_{}.jpg".format(todaydate, counter, image_right.header.stamp.secs), cv_image_right)
+            cv2.imwrite("./dataset/images_left/{}_image{}_{}.jpg".format(todaydate, counter, image_left.header.stamp.secs), cv_image_left)
             #cv2.imwrite("./dataset/images_disparity/{}_image{}_{}.png".format(todaydate, counter, image.header.stamp.secs), cv_disparityimage)
         
-            disparity_file = './dataset/images_disparity/{}_disparity{}_{}.yaml'.format(todaydate, counter, proprioseption.header.stamp.secs)
+            disparity_file = './dataset/images_disparity/{}_pro{}_{}.yaml'.format(todaydate, counter, proprioseption.header.stamp.secs)
             with open(disparity_file, 'w') as outfile:
                 yaml.dump(disparityimage, outfile, Dumper=Dumper)
             #with open(disparity_file, 'r') as inputfile:
@@ -58,12 +60,13 @@ if __name__ == '__main__':
     print(GoalStatusArray)
     print(DisparityImage)
     bridge = CvBridge()
-    image_sub = message_filters.Subscriber('/zed/zed_node/rgb_raw/image_raw_color', Image)
+    image_right_sub = message_filters.Subscriber('/zed/zed_node/right_raw/image_raw_color', Image)
+    image_left_sub = message_filters.Subscriber('/zed/zed_node/left_raw/image_raw_color', Image)
     info_sub = message_filters.Subscriber('/robot/joint_states', JointState)
     active_sub = message_filters.Subscriber('/move_group/status',  GoalStatusArray)
     disparityimage_sub = message_filters.Subscriber('/zed/zed_node/disparity/disparity_image', DisparityImage)
     # ts = message_filters.TimeSynchronizer([image_sub, info_sub], 10)
     # error time can be between two messsages 
-    ts = message_filters.ApproximateTimeSynchronizer([image_sub, info_sub, active_sub, disparityimage_sub], queue_size=10, slop=0.1)
+    ts = message_filters.ApproximateTimeSynchronizer([image_right_sub, image_left_sub, info_sub, active_sub, disparityimage_sub], queue_size=10, slop=0.1)
     ts.registerCallback(callback)
     rospy.spin()
