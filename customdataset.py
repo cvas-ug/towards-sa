@@ -47,7 +47,7 @@ def getfilename(self, index, path, proprioception):
     # To  :pathcopyfromboth_16-10-2018\train\baxter\pro\pro26106_2034.txt
     file = path.replace("images", "pro")
     file = file.replace("image", "pro")
-    file = file.replace(".jpg", ".txt")
+    file = file.replace(".jpg", ".yaml")
     ######
     # used for one file with all proproception elements are randomized
     
@@ -63,6 +63,7 @@ def getfilename(self, index, path, proprioception):
         global dx
         if len(dx) == 0:
             filespath = os.path.abspath(__package__)
+            filespath = os.path.dirname(filespath)
             #randomproprioceptionfile = filespath + '/' + '20190415' + '/' + 'randomuncyned' + '/' + 'allrandomunsyncedprobasedonproofenvranges.txt'
             #randomproprioceptionfile = filespath + '/' + '20190416' + '/' + 'randomuncyned' + '/' + 'allrandomunsyncedprobasedonproofbaxterranges.txt'
             
@@ -72,8 +73,14 @@ def getfilename(self, index, path, proprioception):
             #randomproprioceptionfile = filespath + '/' + '20190514-case3' + '/' + 'envrange' + '/' + 'envproinformation_associatedwith_baxtervalpronames.txt'
             #randomproprioceptionfile = filespath + '/' + '20190514-case4' + '/' + 'baxterrange' + '/' + 'baxterproinformation_associatedwith_valenvpronames.txt'
 
-            randomproprioceptionfile = filespath + '/' + '20190521-case3' + '/' + 'envrange' + '/' + 'envproinformation_associatedwith_baxtervalpronames.txt'
+            #randomproprioceptionfile = filespath + '/' + '20190521-case3' + '/' + 'envrange' + '/' + 'envproinformation_associatedwith_baxtervalpronames.txt'
             #randomproprioceptionfile = filespath + '/' + '20190521-case4' + '/' + 'baxterrange' + '/' + 'baxterproinformation_associatedwith_valenvpronames.txt'
+
+            #randomproprioceptionfile = filespath + '/' + '20190611-case3' + '/' + 'envrange' + '/' + 'envproinformation_associatedwith_baxtervalpronames.yaml'
+            #randomproprioceptionfile = filespath + '/' + '20190611-case4' + '/' + 'baxterrange' + '/' + 'baxterproinformation_associatedwith_valenvpronames.yaml'
+
+            randomproprioceptionfile = filespath + '/' + '20190612-case3' + '/' + 'envrange' + '/' + 'envproinformation_associatedwith_baxtervalpronames.yaml'
+            #randomproprioceptionfile = filespath + '/' + '20190612-case4' + '/' + 'baxterrange' + '/' + 'baxterproinformation_associatedwith_valenvpronames.yaml'
             with open(randomproprioceptionfile, 'r') as outputfile:
                 try:
                     x = outputfile.read()
@@ -114,5 +121,6 @@ def getposition(self, index, path):
 
 def getproprioception(self, index, path):
     proprioception = getfilename(self, index, path, "all")
-    proprioception = proprioception['velocity'] +  proprioception['effort'] + proprioception['position']
+    #proprioception = proprioception['velocity'] +  proprioception['effort'] + proprioception['position'] #<class 'list'>  len=57
+    proprioception = proprioception.velocity +  proprioception.effort + proprioception.position
     return proprioception
