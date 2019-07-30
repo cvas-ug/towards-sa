@@ -12,7 +12,7 @@ images = os.listdir(image_directory_in_str)
 pro = os.listdir(pro_directory_in_str)
 
 imagestopro = [i.replace("image","pro") for i in images]
-imagestopro = [i.replace("jpg","txt") for i in imagestopro]
+imagestopro = [i.replace("jpg","yaml") for i in imagestopro]
 
 unwantedimages = set(imagestopro) - set(pro)
 unwantedpro = set(pro) - set(imagestopro)
@@ -21,7 +21,7 @@ for file in sorted(unwantedimages):
     imagecount += 1
     # rename to comply with pro file name
     imagefilename = file.replace("pro", "image")
-    imagefilename = imagefilename.replace("txt", "jpg")
+    imagefilename = imagefilename.replace("yaml", "jpg")
   
     # move
     os.rename(image_directory_in_str+"/"+imagefilename, "unwanted/"+imagefilename)

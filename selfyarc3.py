@@ -53,11 +53,23 @@ data_transforms = {
 #data_dir = '20190514-case3'
 #data_dir = '20190514-case4'
 
-
 #data_dir = '20190521' #case1and2
-data_dir = '20190521-case3'
+#data_dir = '20190521-case3'
 #data_dir = '20190521-case4'
 
+path = os.path.dirname(__file__)
+print(path)
+path2 = os.path.dirname(path)
+
+#data_dir = '20190611'       #case1and2 real baxter data
+#data_dir = '20190611-case3' #case3 - real baxter data
+#data_dir = '20190611-case4'  #case4 - real baxter data
+
+#data_dir = '20190612'       #case1and2 real baxter data including cases3and4 in the training data.
+data_dir = '20190612-case3' #case3 - real baxter data including cases3and4 in the training data.
+#data_dir = '20190612-case4' #case4 - real baxter data including cases3and4 in the training data.
+
+data_dir =  path2 + '/' + data_dir
 image_datasets = {x: customdataset.ImageFolderWithPaths(os.path.join(data_dir, x),
                                           data_transforms[x])
                   for x in ['train', 'val']}
@@ -140,7 +152,7 @@ def train_model(model, criterion, optimizer, scheduler, num_epochs=25):
                 # forward
                 # track history if only in train
                 with torch.set_grad_enabled(phase == 'train'):
-                    outputs = model(inputs, proprioception)
+                    outputs = model(inputs, proprioception)  #inputs.size() torch.Size([64, 3, 224, 224]) #proprioception.size() torch.Size([64, 51])
                     _, preds = torch.max(outputs, 1)
                     loss = criterion(outputs, labels)
 
@@ -231,15 +243,15 @@ class arch3model(nn.Module):
         self.model_ft.fc = nn.Linear(num_ftrs, 19)
         self.model_ft = self.model_ft.to(device)
         
-        self.fc1 = nn.Linear(76, 50)
+        self.fc1 = nn.Linear(70, 50)
         self.fc2 = nn.Linear(50, 2)
         
     def forward(self, image, proprioception):
-        outof_resnet18 = self.model_ft(image)
+        outof_resnet18 = self.model_ft(image) #outof_resnet18.size() torch.Size([64, 19])
         #pro = proprioception
         
         x = torch.cat((outof_resnet18, proprioception), dim=1)
-        x = F.relu(self.fc1(x))
+        x = F.relu(self.fc1(x)) #x.size() torch.Size([64, 70])
         x = self.fc2(x)
         return x
         
