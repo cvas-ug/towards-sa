@@ -263,8 +263,24 @@ criterion = nn.CrossEntropyLoss()
 
 optimizer_ft = optim.SGD(model_arc3.parameters(), lr=0.001, momentum=0.9)
 
+# Print model's state_dict
+print("Model's state_dict:")
+for param_tensor in model_arc3.state_dict():
+    print(param_tensor, "\t", model_arc3.state_dict()[param_tensor].size())
+
+# Print optimizer's state_dict
+print("Optimizer's state_dict:")
+for var_name in optimizer_ft.state_dict():
+    print(var_name, "\t", optimizer_ft.state_dict()[var_name])
+
 exp_lr_scheduler = lr_scheduler.StepLR(optimizer_ft, step_size=7, gamma=0.1)
-model_arc3 = train_model(model_arc3, criterion, optimizer_ft, exp_lr_scheduler, num_epochs=25)
+train_model = False
+if train_model == True:
+    model_arc3 = train_model(model_arc3, criterion, optimizer_ft, exp_lr_scheduler, num_epochs=25)
+    torch.save(model_arc3.state_dict(), "model_arc3_save.pth")
+
+state_dict = torch.load("model_arc3_save.pth") 
+model_arc3.load_state_dict(state_dict)
 visualize_model(model_arc3)
 
 plt.ioff()
