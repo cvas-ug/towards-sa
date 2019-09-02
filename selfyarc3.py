@@ -65,8 +65,8 @@ path2 = os.path.dirname(path)
 #data_dir = '20190611-case3' #case3 - real baxter data
 #data_dir = '20190611-case4'  #case4 - real baxter data
 
-#data_dir = '20190612'       #case1and2 real baxter data including cases3and4 in the training data.
-data_dir = '20190612-case3' #case3 - real baxter data including cases3and4 in the training data.
+data_dir = '20190612'       #case1and2 real baxter data including cases3and4 in the training data.
+#data_dir = '20190612-case3' #case3 - real baxter data including cases3and4 in the training data.
 #data_dir = '20190612-case4' #case4 - real baxter data including cases3and4 in the training data.
 
 data_dir =  path2 + '/' + data_dir
@@ -74,7 +74,7 @@ image_datasets = {x: customdataset.ImageFolderWithPaths(os.path.join(data_dir, x
                                           data_transforms[x])
                   for x in ['train', 'val']}
 dataloaders = {x: torch.utils.data.DataLoader(image_datasets[x], batch_size=64,
-                                             shuffle=True, num_workers=4)
+                                             shuffle=True, num_workers=0)
               for x in ['train', 'val']}
 dataset_sizes = {x: len(image_datasets[x]) for x in ['train', 'val']}
 class_names = image_datasets['train'].classes
@@ -235,6 +235,90 @@ def visualize_model(model, num_images=6):
                     return
         model.train(mode=was_training)
 
+def eval_model(model, criterion, optimizer, scheduler, num_epochs=25):
+    since = time.time()
+    best_acc = 0.0
+
+    ##all_epochs_train_losses_average = []
+    ##all_epochs_train_accuraies_average = []
+    all_epochs_val_losses_average = []
+    all_epochs_val_accuraies_average = []
+
+    for epoch in range(num_epochs):
+        print('Epoch {}/{}'.format(epoch, num_epochs - 1))
+        print('-' * 10)
+
+        # Each epoch has a training and validation phase
+        for phase in ['val']:
+            model.eval()   # Set model to evaluate mode
+
+            running_loss = 0.0
+            running_corrects = 0
+
+            # Iterate over data.
+            for inputs, labels, path, tensorpro in dataloaders[phase]:
+                inputs = inputs.to(device)
+                labels = labels.to(device)
+                proprioception = tensorpro.to(device)
+
+                # zero the parameter gradients
+                optimizer.zero_grad()
+
+                # forward
+                # track history if only in train
+                with torch.set_grad_enabled(phase == 'train'):
+                    outputs = model(inputs, proprioception)  #inputs.size() torch.Size([64, 3, 224, 224]) #proprioception.size() torch.Size([64, 51])
+                    _, preds = torch.max(outputs, 1)
+                    loss = criterion(outputs, labels)
+
+                # statistics
+                running_loss += loss.item() * inputs.size(0)
+                running_corrects += torch.sum(preds == labels.data)
+
+            epoch_loss = running_loss / dataset_sizes[phase]
+            epoch_acc = running_corrects.double() / dataset_sizes[phase]
+
+            print('{} Loss: {:.4f} Acc: {:.4f}'.format(
+                phase, epoch_loss, epoch_acc))
+            
+            ##if phase == 'train':
+                ##all_epochs_train_losses_average.append(epoch_loss)
+                ##all_epochs_train_accuraies_average.append(epoch_acc.item())
+            #elif phase == 'val':
+            if phase == 'val':
+                all_epochs_val_losses_average.append(epoch_loss)
+                all_epochs_val_accuraies_average.append(epoch_acc.item())
+                
+
+            # deep copy the model
+            if phase == 'val' and epoch_acc > best_acc:
+                best_acc = epoch_acc
+
+        print()
+
+    time_elapsed = time.time() - since
+    print('Training complete in {:.0f}m {:.0f}s'.format(
+        time_elapsed // 60, time_elapsed % 60))
+    print('Best val Acc: {:4f}'.format(best_acc))
+
+    plotlossaverages_eval(num_epochs, all_epochs_val_losses_average)
+
+    # load best model weights
+    #model.load_state_dict(best_model_wts)
+    return model
+
+
+def plotlossaverages_eval(num_epochs, all_epochs_val_losses_average):
+    t1 = np.arange(0, num_epochs, 1)
+    plt.figure()
+    plt.plot(t1, all_epochs_val_losses_average, 'b')#, train_accuracy_average, 'g', val_accuracy_average, 'purple' )# ,label='epoch'+str(epoch))
+    plt.legend(['Training loss ave.', 'Validation loss ave.'])#, 'Val loss ave.', 'Val accu ave.'])
+    #plt.legend(loc='upper left', mode="expanded", shadow=True, ncol=2)
+    plt.xlabel("Epoch number", fontsize=12, color='blue')
+    plt.ylabel("Average loss", fontsize=12, color='blue')
+    plt.title("Arch3: training loss and validation loss averages")
+    plt.show(5)
+
 class arch3model(nn.Module):
     def __init__(self):
         super(arch3model, self).__init__()
@@ -274,13 +358,15 @@ for var_name in optimizer_ft.state_dict():
     print(var_name, "\t", optimizer_ft.state_dict()[var_name])
 
 exp_lr_scheduler = lr_scheduler.StepLR(optimizer_ft, step_size=7, gamma=0.1)
-train_model = False
-if train_model == True:
+train_mode = False
+if train_mode == True:
     model_arc3 = train_model(model_arc3, criterion, optimizer_ft, exp_lr_scheduler, num_epochs=25)
     torch.save(model_arc3.state_dict(), "model_arc3_save.pth")
 
 state_dict = torch.load("model_arc3_save.pth") 
 model_arc3.load_state_dict(state_dict)
+model_arc3 = eval_model(model_arc3, criterion, optimizer_ft, exp_lr_scheduler, num_epochs=25)
+
 visualize_model(model_arc3)
 
 plt.ioff()
