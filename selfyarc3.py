@@ -16,6 +16,7 @@ import customdataset
 import torch.nn.functional as F
 
 import itertools
+import scikitplot as skplt
 
 plt.ion()   # interactive mode
 
@@ -67,9 +68,9 @@ path2 = os.path.dirname(path)
 #data_dir = '20190611-case3' #case3 - real baxter data
 #data_dir = '20190611-case4'  #case4 - real baxter data
 
-#data_dir = '20190612'       #case1and2 real baxter data including cases3and4 in the training data.
+data_dir = '20190612'       #case1and2 real baxter data including cases3and4 in the training data.
 #data_dir = '20190612-case3' #case3 - real baxter data including cases3and4 in the training data.
-data_dir = '20190612-case4' #case4 - real baxter data including cases3and4 in the training data.
+#data_dir = '20190612-case4' #case4 - real baxter data including cases3and4 in the training data.
 
 data_dir =  path2 + '/' + data_dir
 image_datasets = {x: customdataset.ImageFolderWithPaths(os.path.join(data_dir, x),
@@ -112,9 +113,9 @@ def imshow(inp, title=None):
 inputs, classes, path, tensorpro = next(iter(dataloaders['train']))
 
 # Make a grid from batch
-out = torchvision.utils.make_grid(inputs)
+#out = torchvision.utils.make_grid(inputs)
 
-imshow(out, title=[class_names[x] for x in classes])
+#imshow(out, title=[class_names[x] for x in classes])
 
 def train_model(model, criterion, optimizer, scheduler, num_epochs=25):
     since = time.time()
@@ -322,6 +323,10 @@ def plotlossaverages_eval(num_epochs, all_epochs_val_losses_average):
     plt.show(5)
 
 def accuracy(model):
+    test_y = list()
+    probas_y = list()
+    prefix='./plots'
+
     model.eval()
     correctHits = 0
     total = 0
@@ -336,9 +341,16 @@ def accuracy(model):
         labels = labels.to(device)
         proprioception = proprioception.to(device)
 
-        outputs = model(inputs, proprioception)
-        _, outputs = torch.max(outputs.data, 1)  # return max as well as its index
+        #outputs = model(inputs, proprioception)
+        #_, outputs = torch.max(outputs.data, 1)  # return max as well as its index
         #_, preds = torch.max(outputs, 1) #check if same above, later
+
+        outputs_probas = model(inputs, proprioception)
+        _, outputs = torch.max(outputs_probas.data, 1)
+
+        probas_y.extend(outputs_probas.data.cpu().numpy().tolist())
+        test_y.extend(labels.data.cpu().numpy().flatten().tolist())
+
         total += labels.size(0)
         correctHits += (outputs == labels).sum().item()
         accuracy = (correctHits/total)*100
@@ -405,7 +417,8 @@ def accuracy(model):
     ppv = tp / (tp+fp) if (tp+fp) != 0 else 0
     print("precision - Positive predictive value (PPV) = {}".format(ppv))
 
-    confusionMatrix(cm, accuracy, total)
+    #confusionMatrix(cm, accuracy, total)
+    plt_roc(test_y, probas_y, prefix)
 
 
 def confusionMatrix(cm, accuracy, total):
@@ -432,6 +445,15 @@ def confusionMatrix(cm, accuracy, total):
     plt.ylabel('True label', fontsize=12, color='blue')
     plt.xlabel('Predicted label', fontsize=12, color='blue')
     plt.show()
+
+def add_prefix(prefix, path):
+    return os.path.join(prefix, path)
+
+def plt_roc(test_y, probas_y, prefix, plot_micro=False, plot_macro=False):
+    assert isinstance(test_y, list) and isinstance(probas_y, list), 'the type of input must be list'
+    skplt.metrics.plot_roc(test_y, probas_y, plot_micro=plot_micro, plot_macro=plot_macro)
+    plt.savefig(add_prefix(prefix, 'roc_auc_curve.png'))
+    plt.close()
 
 class arch3model(nn.Module):
     def __init__(self):
@@ -481,9 +503,9 @@ state_dict = torch.load("model_arc3_save.pth")
 model_arc3.load_state_dict(state_dict)
 #model_arc3 = eval_model(model_arc3, criterion, optimizer_ft, exp_lr_scheduler, num_epochs=25)
 
-visualize_model(model_arc3)
+#visualize_model(model_arc3)
 # have the confusion matrix.
 accuracy(model_arc3)
 
-plt.ioff()
-plt.show()
+#plt.ioff()
+#plt.show()
