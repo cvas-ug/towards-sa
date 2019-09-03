@@ -15,6 +15,8 @@ import copy
 import customdataset
 import torch.nn.functional as F
 
+import itertools
+
 plt.ion()   # interactive mode
 
 data_transforms = {
@@ -65,15 +67,15 @@ path2 = os.path.dirname(path)
 #data_dir = '20190611-case3' #case3 - real baxter data
 #data_dir = '20190611-case4'  #case4 - real baxter data
 
-data_dir = '20190612'       #case1and2 real baxter data including cases3and4 in the training data.
+#data_dir = '20190612'       #case1and2 real baxter data including cases3and4 in the training data.
 #data_dir = '20190612-case3' #case3 - real baxter data including cases3and4 in the training data.
-#data_dir = '20190612-case4' #case4 - real baxter data including cases3and4 in the training data.
+data_dir = '20190612-case4' #case4 - real baxter data including cases3and4 in the training data.
 
 data_dir =  path2 + '/' + data_dir
 image_datasets = {x: customdataset.ImageFolderWithPaths(os.path.join(data_dir, x),
                                           data_transforms[x])
                   for x in ['train', 'val']}
-dataloaders = {x: torch.utils.data.DataLoader(image_datasets[x], batch_size=64,
+dataloaders = {x: torch.utils.data.DataLoader(image_datasets[x], batch_size=1,
                                              shuffle=True, num_workers=0)
               for x in ['train', 'val']}
 dataset_sizes = {x: len(image_datasets[x]) for x in ['train', 'val']}
@@ -319,6 +321,118 @@ def plotlossaverages_eval(num_epochs, all_epochs_val_losses_average):
     plt.title("Arch3: training loss and validation loss averages")
     plt.show(5)
 
+def accuracy(model):
+    model.eval()
+    correctHits = 0
+    total = 0
+    accuracy = 0
+    trueSelf_predictedSelf = 0
+    trueSelf_predictedEnvironment = 0
+    trueEnvironment_predictedSelf = 0
+    trueEnvironment_predictedEnvironment = 0
+    for batches in dataloaders['val']:
+        inputs, labels, path, proprioception = batches
+        inputs = inputs.to(device)
+        labels = labels.to(device)
+        proprioception = proprioception.to(device)
+
+        outputs = model(inputs, proprioception)
+        _, outputs = torch.max(outputs.data, 1)  # return max as well as its index
+        #_, preds = torch.max(outputs, 1) #check if same above, later
+        total += labels.size(0)
+        correctHits += (outputs == labels).sum().item()
+        accuracy = (correctHits/total)*100
+        val = [outputs.item(), labels.item()]
+        print(val)
+        if val == [0, 0]:
+            trueSelf_predictedSelf += 1
+        if val == [1, 0]:
+            trueSelf_predictedEnvironment += 1
+        if val == [0, 1]:
+            trueEnvironment_predictedSelf += 1
+        if val == [1, 1]:
+            trueEnvironment_predictedEnvironment += 1
+    print('Accuracy ={} on total of batch {}'.format(accuracy, total))
+    cm = np.array([[trueSelf_predictedSelf, trueSelf_predictedEnvironment],
+                [trueEnvironment_predictedSelf, trueEnvironment_predictedEnvironment]])
+    
+    # From self prospective:
+    # self : is positive class.
+    # env  : is negative class.
+    # P condition positive: the number of real positive cases in the data (tp+fn)
+    # N condition negative: the number of real negative cases in the data
+    tp = trueSelf_predictedSelf #truly predicted positive 
+    fn = trueSelf_predictedEnvironment #falsely predicted negative
+    fp = trueEnvironment_predictedSelf #falsely predicted positive
+    tn = trueEnvironment_predictedEnvironment #truly predicted negative
+    p= tp+fn #actual self
+    n= fp+tn #actual env
+    print(trueSelf_predictedSelf + trueSelf_predictedEnvironment)
+    print(trueEnvironment_predictedEnvironment + trueEnvironment_predictedSelf)
+    print(tp)
+    print(fn)
+    print(fp)
+    print(tn)
+    #Accuracy (ACC) = Σ True positive + Σ True negative / Σ Total population
+    acc = (tp + tn)/(tp+fp+fn+tn)
+    print("acc = {}".format(acc))
+
+    #Misclassification rate - overall wrong
+    mis = (fn + fp)/(tp+fp+fn+tn)
+    print("Misclassification rate = {}".format(mis))
+
+    #Prevalence = Σ Condition positive / Σ Total population
+    prevalence = p / (tp+fp+fn+tn)
+    print("Prevalence = {}".format(prevalence))
+
+    #sensitivity, recall, hit rate, or true positive rate (TPR)
+    #when it's actually self, how often does it predict self.
+    tpr =  ( tp / p ) if p != 0 else 0
+    print("sensitivity - true positive rate (TPR) = {}".format(tpr))
+
+    #When it is actually env, how often does it predicted self.
+    #predicted as self, but actually it is env
+    fpr = ( fp / n ) if n != 0 else 0
+    print("false alarm - False positive rate (FPR) = {}".format(fpr))
+
+    #When it is actually env, how often does it predicted env (TNR).
+    #Specificity
+    tnr = tn / n
+    print("Specificity - true nigative rate (TNR) = {}".format(tnr))
+
+    #when predict self, how often it is correct.
+    #Positive predictive value (PPV), precision
+    ppv = tp / (tp+fp) if (tp+fp) != 0 else 0
+    print("precision - Positive predictive value (PPV) = {}".format(ppv))
+
+    confusionMatrix(cm, accuracy, total)
+
+
+def confusionMatrix(cm, accuracy, total):
+    target_names = ['Self', 'Environment']
+    title = "Confusion Matrix Arch4" + ':Accuracy ={} on total of batch {}'.format(accuracy, total)
+    cmap = "Greens"
+
+    if cmap is None:
+        cmap = plt.get_cmap("Blues")
+
+    plt.figure()
+    plt.imshow(cm, interpolation='nearest', cmap=cmap)
+    plt.title(title, fontsize=9, color='red')
+    plt.colorbar()
+    if target_names is not None:
+        tick_marks = np.arange(len(target_names))
+        plt.xticks(tick_marks, target_names)  #, rotation=45)
+        plt.yticks(tick_marks, target_names)
+    
+    thresh = cm.max() / 1.5
+    for i, j in itertools.product(range(cm.shape[0]), range(cm.shape[1])):
+        plt.text(j, i, "{:,}".format(cm[i, j]), horizontalalignment="center", color="white" if cm[i, j] > thresh else "black")
+    plt.tight_layout()
+    plt.ylabel('True label', fontsize=12, color='blue')
+    plt.xlabel('Predicted label', fontsize=12, color='blue')
+    plt.show()
+
 class arch3model(nn.Module):
     def __init__(self):
         super(arch3model, self).__init__()
@@ -365,9 +479,11 @@ if train_mode == True:
 
 state_dict = torch.load("model_arc3_save.pth") 
 model_arc3.load_state_dict(state_dict)
-model_arc3 = eval_model(model_arc3, criterion, optimizer_ft, exp_lr_scheduler, num_epochs=25)
+#model_arc3 = eval_model(model_arc3, criterion, optimizer_ft, exp_lr_scheduler, num_epochs=25)
 
 visualize_model(model_arc3)
+# have the confusion matrix.
+accuracy(model_arc3)
 
 plt.ioff()
 plt.show()
