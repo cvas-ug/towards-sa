@@ -76,8 +76,8 @@ data_dir =  path2 + '/' + data_dir
 image_datasets = {x: customdataset.ImageFolderWithPaths(os.path.join(data_dir, x),
                                           data_transforms[x])
                   for x in ['train', 'val']}
-dataloaders = {x: torch.utils.data.DataLoader(image_datasets[x], batch_size=64,
-                                             shuffle=True, num_workers=4)
+dataloaders = {x: torch.utils.data.DataLoader(image_datasets[x], batch_size=1,
+                                             shuffle=True, num_workers=0)
               for x in ['train', 'val']}
 dataset_sizes = {x: len(image_datasets[x]) for x in ['train', 'val']}
 class_names = image_datasets['train'].classes
@@ -238,6 +238,8 @@ def visualize_model(model, num_images=6):
                     return
         model.train(mode=was_training)
 
+# this method is limited for evaluation only using saved best training state.
+# the "plotlossaverages_eval" used does not make sense as it plot same state for every epoch.
 def eval_model(model, criterion, optimizer, scheduler, num_epochs=25):
     since = time.time()
     best_acc = 0.0
@@ -503,9 +505,9 @@ state_dict = torch.load("model_arc3_save.pth")
 model_arc3.load_state_dict(state_dict)
 model_arc3 = eval_model(model_arc3, criterion, optimizer_ft, exp_lr_scheduler, num_epochs=25)
 
-visualize_model(model_arc3)
+#visualize_model(model_arc3)
 # have the confusion matrix.
-#accuracy(model_arc3)
+accuracy(model_arc3)
 
 plt.ioff()
 plt.show()
