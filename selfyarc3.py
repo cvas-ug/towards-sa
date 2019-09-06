@@ -76,8 +76,8 @@ data_dir =  path2 + '/' + data_dir
 image_datasets = {x: customdataset.ImageFolderWithPaths(os.path.join(data_dir, x),
                                           data_transforms[x])
                   for x in ['train', 'val']}
-dataloaders = {x: torch.utils.data.DataLoader(image_datasets[x], batch_size=1,
-                                             shuffle=True, num_workers=0)
+dataloaders = {x: torch.utils.data.DataLoader(image_datasets[x], batch_size=64,
+                                             shuffle=True, num_workers=4)
               for x in ['train', 'val']}
 dataset_sizes = {x: len(image_datasets[x]) for x in ['train', 'val']}
 class_names = image_datasets['train'].classes
@@ -113,9 +113,9 @@ def imshow(inp, title=None):
 inputs, classes, path, tensorpro = next(iter(dataloaders['train']))
 
 # Make a grid from batch
-#out = torchvision.utils.make_grid(inputs)
+out = torchvision.utils.make_grid(inputs)
 
-#imshow(out, title=[class_names[x] for x in classes])
+imshow(out, title=[class_names[x] for x in classes])
 
 def train_model(model, criterion, optimizer, scheduler, num_epochs=25):
     since = time.time()
@@ -417,13 +417,13 @@ def accuracy(model):
     ppv = tp / (tp+fp) if (tp+fp) != 0 else 0
     print("precision - Positive predictive value (PPV) = {}".format(ppv))
 
-    #confusionMatrix(cm, accuracy, total)
+    confusionMatrix(cm, accuracy, total)
     plt_roc(test_y, probas_y, prefix)
 
 
 def confusionMatrix(cm, accuracy, total):
     target_names = ['Self', 'Environment']
-    title = "Confusion Matrix Arch4" + ':Accuracy ={} on total of batch {}'.format(accuracy, total)
+    title = "Confusion Matrix Arch3" + ':Accuracy ={} on total of batch {}'.format(accuracy, total)
     cmap = "Greens"
 
     if cmap is None:
@@ -501,11 +501,11 @@ if train_mode == True:
 
 state_dict = torch.load("model_arc3_save.pth") 
 model_arc3.load_state_dict(state_dict)
-#model_arc3 = eval_model(model_arc3, criterion, optimizer_ft, exp_lr_scheduler, num_epochs=25)
+model_arc3 = eval_model(model_arc3, criterion, optimizer_ft, exp_lr_scheduler, num_epochs=25)
 
-#visualize_model(model_arc3)
+visualize_model(model_arc3)
 # have the confusion matrix.
-accuracy(model_arc3)
+#accuracy(model_arc3)
 
-#plt.ioff()
-#plt.show()
+plt.ioff()
+plt.show()
