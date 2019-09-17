@@ -18,6 +18,9 @@ import torch.nn.functional as F
 import itertools
 import scikitplot as skplt
 
+from flashtorch.utils import apply_transforms, load_image
+from flashtorch.saliency import Backprop
+
 plt.ion()   # interactive mode
 
 data_transforms = {
@@ -72,6 +75,8 @@ data_dir = '20190612'       #case1and2 real baxter data including cases3and4 in 
 #data_dir = '20190612-case3' #case3 - real baxter data including cases3and4 in the training data.
 #data_dir = '20190612-case4' #case4 - real baxter data including cases3and4 in the training data.
 
+#data_dir = '20190612-test' #has only baxter just for test the visualisation
+
 data_dir =  path2 + '/' + data_dir
 image_datasets = {x: customdataset.ImageFolderWithPaths(os.path.join(data_dir, x),
                                           data_transforms[x])
@@ -97,6 +102,7 @@ torch.backends.cudnn.benchmark = False
 print("Current seed: {}".format(current_seed))
 print("dataset     : " + data_dir)
 
+
 def imshow(inp, title=None):
     """Imshow for Tensor."""
     inp = inp.numpy().transpose((1, 2, 0))
@@ -115,7 +121,7 @@ inputs, classes, path, tensorpro = next(iter(dataloaders['train']))
 # Make a grid from batch
 out = torchvision.utils.make_grid(inputs)
 
-imshow(out, title=[class_names[x] for x in classes])
+#imshow(out, title=[class_names[x] for x in classes])
 
 def train_model(model, criterion, optimizer, scheduler, num_epochs=25):
     since = time.time()
@@ -476,7 +482,7 @@ class arch3model(nn.Module):
         x = F.relu(self.fc1(x)) #x.size() torch.Size([64, 70])
         x = self.fc2(x)
         return x
-        
+
 
 model_arc3 = arch3model()
 model_arc3 = model_arc3.to(device)
@@ -485,12 +491,12 @@ criterion = nn.CrossEntropyLoss()
 
 optimizer_ft = optim.SGD(model_arc3.parameters(), lr=0.001, momentum=0.9)
 
-# Print model's state_dict
+ # Print model's state_dict
 print("Model's state_dict:")
 for param_tensor in model_arc3.state_dict():
     print(param_tensor, "\t", model_arc3.state_dict()[param_tensor].size())
 
-# Print optimizer's state_dict
+    # Print optimizer's state_dict
 print("Optimizer's state_dict:")
 for var_name in optimizer_ft.state_dict():
     print(var_name, "\t", optimizer_ft.state_dict()[var_name])
@@ -501,13 +507,49 @@ if train_mode == True:
     model_arc3 = train_model(model_arc3, criterion, optimizer_ft, exp_lr_scheduler, num_epochs=25)
     torch.save(model_arc3.state_dict(), "model_arc3_save.pth")
 
-state_dict = torch.load("model_arc3_save.pth") 
-model_arc3.load_state_dict(state_dict)
-model_arc3 = eval_model(model_arc3, criterion, optimizer_ft, exp_lr_scheduler, num_epochs=25)
+state_dict = torch.load("model_arc3_save.pth")
+testmodel = arch3model()
+testmodel.load_state_dict(state_dict)
+testmodel.eval()
+print(device)
+testmodel.to(device)
+backprop = Backprop(testmodel)
+
+#image = load_image('/home/ali/Pytorchwork/20190612/val/baxter/images/20190607_image11638_1559912512.jpg')#/content/images/great_grey_owl.jpg')
+#pro = load_image('/home/ali/Pytorchwork/20190612/val/baxter/pro/20190607_pro313_1559909173.yaml')
+#plt.imshow(image)
+#plt.title('Original image')
+#plt.axis('off')
+#plt.pause(3)
+
+for inputs, labels, path, tensorpro in dataloaders['val']:
+    inputsfrompath = apply_transforms(load_image(path[0]))
+    inputsfrompath =  inputsfrompath.to(device)
+    inputs = inputs.to(device)
+    inputs.requires_grad = True
+    labels = labels.to(device)
+    proprioception = tensorpro.to(device)
+    proprioceptionge = proprioception
+    proprioceptionge.requires_grad = True
+
+    #class_index = class_names.index('baxter')
+    class_index = labels
+
+    #Calculate the gradients of each pixel w.r.t. the input image
+    #the maximum of the gradients for each pixel across colour channels.
+    backprop.visualize(inputs, proprioception, class_index, guided=True, use_gpu=True)
+    plt.ioff()
+    plt.show()
+    backprop.visualize(inputs, proprioceptionge, class_index, guided=True, use_gpu=True)
+    plt.ioff()
+    plt.show()
+    backprop.visualize(inputsfrompath, proprioception, class_index, guided=True, use_gpu=True)
+    plt.ioff()
+    plt.show()
 
 #visualize_model(model_arc3)
 # have the confusion matrix.
-accuracy(model_arc3)
+#accuracy(model_arc3)
 
-plt.ioff()
-plt.show()
+#plt.ioff()
+#plt.show()
