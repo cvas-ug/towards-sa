@@ -44,11 +44,11 @@ if __name__ == '__main__':
                 cv_image_left = bridge.imgmsg_to_cv2(image_left, "bgr8")
             except CvBridgeError as e:
                 print(e)    
-            cv2.imwrite("./dataset/images_right/{}_image{}_{}.jpg".format(todaydate, counter, image_right.header.stamp.secs), cv_image_right)
-            cv2.imwrite("./dataset/images_left/{}_image{}_{}.jpg".format(todaydate, counter, image_left.header.stamp.secs), cv_image_left)
+            cv2.imwrite("./dataset/images_right/{}_imageright{}_{}.jpg".format(todaydate, counter, image_right.header.stamp.secs), cv_image_right)
+            cv2.imwrite("./dataset/images_left/{}_imageleft{}_{}.jpg".format(todaydate, counter, image_left.header.stamp.secs), cv_image_left)
             #cv2.imwrite("./dataset/images_disparity/{}_image{}_{}.png".format(todaydate, counter, image.header.stamp.secs), cv_disparityimage)
         
-            disparity_file = './dataset/images_disparity/{}_pro{}_{}.yaml'.format(todaydate, counter, proprioseption.header.stamp.secs)
+            disparity_file = './dataset/images_disparity/{}_disparity{}_{}.yaml'.format(todaydate, counter, proprioseption.header.stamp.secs)
             with open(disparity_file, 'w') as outfile:
                 yaml.dump(disparityimage, outfile, Dumper=Dumper)
             #with open(disparity_file, 'r') as inputfile:
