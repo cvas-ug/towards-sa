@@ -34,3 +34,15 @@ To check the live proprioseptions:
 	rostopic echo /robot/joint_states 
 To check the image take:
 	camera rostopic
+
+
+23-09-2019 #steps for capturing data:
+rosrun baxter_tools enable_robot.py -e
+rosrun baxter_interface joint_trajectory_action_server.py
+roslaunch zed_wrapper zed.launch
+roslaunch baxter_moveit_config baxter_grippers.launch
+
+python moveitpythonin.py
+python moveitpythonout.py
+
+python generateds_real.py
