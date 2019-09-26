@@ -21,7 +21,7 @@ file_path = data_path +"/"+ DATASET + "/" + DATASET + ".csv"
 with open(DATASET + ".csv", mode='w', newline='', encoding='utf-8') as dataset_file:
     dataset_writer = csv.writer(dataset_file, delimiter=',', quotechar='"', quoting=csv.QUOTE_MINIMAL)
 
-    dataset_writer.writerow(['image', 'proprioception'])
+    dataset_writer.writerow(['right', 'left', 'disparity', 'proprioception'])
 
     base_names = []
     directory = os.fsencode(data_path +"/"+ DATASET + "/images_right")
