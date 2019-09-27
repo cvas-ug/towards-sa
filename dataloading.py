@@ -10,11 +10,16 @@ from torch.utils.data import DataLoader, Dataset
 import torchvision
 from torchvision import transforms, utils
 
+from PIL import Image
+
 class SADataset(Dataset):
 
-    def __init__(self, csv_file, root_dir, transform=None):
-        self.data = pd.read_csv(csv_file)
-        self.root_dir = root_dir
+    def __init__(self, csv_file, trainorval, transform=None):
+        iter_csv = pd.read_csv(csv_file, iterator=True)
+        df = pd.concat([chunk[chunk['set'] == trainorval] for chunk in iter_csv])
+        self.csv_file = csv_file
+        self.data = df
+        self.trainorval = trainorval
         self.transform = transform
 
     def __len__(self):
@@ -26,26 +31,36 @@ class SADataset(Dataset):
         image_disparity = self.data.iloc[idx, 2]
         pro_path = self.data.iloc[idx, 3]
 
+
         #img_name = os.path.join(image_file1)
-        image = io.imread(image_right)
+        #image = io.imread(image_right)
+        img_rgba = Image.open(image_right)
+        image_data = img_rgba.convert('RGB')
+
         if self.transform:
-            image = self.transform(image)
+            image_data = self.transform(image_data)
         
         pro = getproprioception(self, idx, pro_path)
         if pro is not None:
             tensorpro = torch.tensor(pro)
 
         path = image_right
-        target = 'baxter' #to do: take it dynamically from folder name later
+        if "baxter" in self.csv_file:
+            target = 0
+        else:
+            target = 1
+        #target = torch.tensor(target)
 
-        sample = {'image': image, 'target': target, 'path': path, 'pro':tensorpro }
+        #target = 'baxter' #to do: take it dynamically from folder name later
 
-        return sample
+        #sample = {'image': image_data, 'target': target, 'path': path, 'pro':tensorpro }
+        #return sample
 
-sa_dataset = SADataset(csv_file='20190925.csv',
-                                    root_dir='/home/ali/Pytorchwork/level1/')
+        return image_data, target, path, tensorpro
 
-fig = plt.figure()
+#sa_dataset = SADataset(csv_file='20190925_baxter.csv', trainorval="val")#,
+                                    #root_dir='/home/ali/Pytorchwork/level1/')
+#fig = plt.figure()
 
 def getfilename(self, index, path, proprioception):
     with open(path, 'r') as outputfile:
@@ -82,7 +97,7 @@ def show_data(image):
     plt.imshow(image)
     plt.pause(0.001)
 
-for i in range(len(sa_dataset)):
+""" for i in range(len(sa_dataset)):
     sample = sa_dataset[i]
 
     print(i, sample['image'].shape)
@@ -95,4 +110,4 @@ for i in range(len(sa_dataset)):
 
     if i == 3:
         plt.show()
-        break
+        break """
