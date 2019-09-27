@@ -12,6 +12,7 @@ import time
 import os
 import copy
 
+import dataloading
 import customdataset
 import torch.nn.functional as F
 
@@ -78,14 +79,18 @@ data_dir = '20190612'       #case1and2 real baxter data including cases3and4 in 
 #data_dir = '20190612-test' #has only baxter just for test the visualisation
 
 data_dir =  path2 + '/' + data_dir
-image_datasets = {x: customdataset.ImageFolderWithPaths(os.path.join(data_dir, x),
+#image_datasets = {x: customdataset.ImageFolderWithPaths(os.path.join(data_dir, x),
+#                                          data_transforms[x])
+#                  for x in ['train', 'val']}
+csv_file = '20190925_baxter.csv'
+image_datasets = {x: dataloading.SADataset(csv_file, x,
                                           data_transforms[x])
                   for x in ['train', 'val']}
 dataloaders = {x: torch.utils.data.DataLoader(image_datasets[x], batch_size=1,
                                              shuffle=True, num_workers=0)
               for x in ['train', 'val']}
 dataset_sizes = {x: len(image_datasets[x]) for x in ['train', 'val']}
-class_names = image_datasets['train'].classes
+#class_names = image_datasets['train'].classes
 
 device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 print("Training runs on : " + str(device))
