@@ -12,24 +12,36 @@ from torchvision import transforms, utils
 
 from PIL import Image
 
+validation_split = 0.8
+current_seed = 2481
+torch.cuda.manual_seed(current_seed)
+torch.manual_seed(current_seed)
+
+torch.backends.cudnn.deterministic = True
+torch.backends.cudnn.benchmark = False
+
 class SADataset(Dataset):
 
-    def __init__(self, csv_file, trainorval, transform=None):
-        iter_csv = pd.read_csv(csv_file, iterator=True)
-        df = pd.concat([chunk[chunk['set'] == trainorval] for chunk in iter_csv])
+    def __init__(self, csv_file, groupset, transform=None):
+        #iter_csv = pd.read_csv(csv_file, iterator=True)
+        #df = pd.concat([chunk[chunk['set'] == trainorval] for chunk in iter_csv])
         self.csv_file = csv_file
-        self.data = df
-        self.trainorval = trainorval
+        #self.data = df
+        self.data = pd.read_csv(csv_file)
+        self.data = create_datasets(self.data, groupset)
+        #self.trainorval = groupset
         self.transform = transform
 
     def __len__(self):
         return len(self.data)
 
     def __getitem__(self, idx):
-        image_right = self.data.iloc[idx, 0]
-        image_left = self.data.iloc[idx, 1]
-        image_disparity = self.data.iloc[idx, 2]
-        pro_path = self.data.iloc[idx, 3]
+        #image_right = self.data.dataset.values[self.data.indices][idx][0] #self.data.iloc[idx, 0]
+        image_right = self.data.dataset["right"][int(self.data.indices[idx])]
+        image_left = self.data.dataset["left"][int(self.data.indices[idx])] #self.data.iloc[idx, 1]
+        image_disparity = self.data.dataset["disparity"][int(self.data.indices[idx])] #self.data.iloc[idx, 2]
+        pro_path = self.data.dataset["proprioception"][int(self.data.indices[idx])] #self.data.iloc[idx, 3]
+        print(self.data.indices)
 
 
         #img_name = os.path.join(image_file1)
@@ -111,3 +123,18 @@ def show_data(image):
     if i == 3:
         plt.show()
         break """
+
+def create_datasets(dataset, groupset):#shuffle_dataset):
+    # Creating data indices for training and validation splits:
+    train_size = int(validation_split * len(dataset))
+    test_size = len(dataset) - train_size
+    train_ds, validation_ds = torch.utils.data.random_split(dataset, [train_size, test_size])
+    print("Train size: {}".format(len(train_ds)))
+    print("Validation size: {}".format(len(validation_ds)))
+
+    #train_loader = DataLoader(train_ds, batch_size=batch_training, shuffle=shuffle_dataset, num_workers=4)
+    #validation_loader = DataLoader(validation_ds, batch_size=batch_validation, shuffle=shuffle_dataset, num_workers=4)
+    if groupset == "train":
+        return train_ds
+    else:
+        return validation_ds
