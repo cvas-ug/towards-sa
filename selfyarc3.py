@@ -121,10 +121,10 @@ def imshow(inp, title=None):
     plt.pause(3)  # pause a bit so that plots are updated
 
 # Get a batch of training data
-inputs, classes, path, tensorpro = next(iter(dataloaders['train']))
+#inputs, classes, path, tensorpro = next(iter(dataloaders['train']))
 
 # Make a grid from batch
-out = torchvision.utils.make_grid(inputs)
+#out = torchvision.utils.make_grid(inputs)
 
 #imshow(out, title=[class_names[x] for x in classes])
 
