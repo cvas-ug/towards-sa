@@ -1,5 +1,9 @@
 import csv
 import os
+import pandas as pd
+
+from numpy.random import RandomState
+
 
 # ****************** 
 # Only edit variable below with the name of the dataset
@@ -11,6 +15,10 @@ dataset_folders = ["fc", "fg"]
 # ******************
 theclass= "baxter"
 # ******************
+csv_file = '20190925.csv'
+validation_split = 0.8
+env_csv = '20190925_env.csv'
+me_csv = '20190925_me.csv'
 
 # ******************
 # DO NOT EDIT FROM HERE!!!
@@ -54,3 +62,24 @@ for aclass in folders_class:
                     dataset_writer.writerow([img_right_path, img_left_path, img_disparity, pro_path])
 
 print("Dataset mapping to csv, Done!")
+
+
+def create_datasets(env_csv, me_csv):
+    # Creating training and validation splits: 
+    dataframe_me = pd.read_csv(me_csv)
+    rng_me = RandomState()
+    train_me = dataframe_me.sample(frac=validation_split, random_state=rng_me)
+    test_me = dataframe_me.loc[~dataframe_me.index.isin(train_me.index)]
+
+    dataframe_env = pd.read_csv(env_csv)
+    rng_env = RandomState()
+    train_env = dataframe_env.sample(frac=validation_split, random_state=rng_env)
+    test_env = dataframe_env.loc[~dataframe_env.index.isin(train_env.index)]
+
+    both_classes_training_data = train_me.append(train_env)
+    both_classes_test_data = test_me.append(test_env)
+
+    both_classes_training_data.to_csv('train.csv', index=False)
+    both_classes_test_data.to_csv('eval.csv', index=False)
+
+create_datasets(env_csv, me_csv)
