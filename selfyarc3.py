@@ -83,7 +83,7 @@ data_dir =  path2 + '/' + data_dir
 #                                          data_transforms[x])
 #                  for x in ['train', 'val']}
 csv_file = '20190925_baxter.csv'
-image_datasets = {x: dataloading.SADataset(csv_file, x,
+image_datasets = {x: dataloading.SADataset(x,
                                           data_transforms[x])
                   for x in ['train', 'val']}
 dataloaders = {x: torch.utils.data.DataLoader(image_datasets[x], batch_size=1,
