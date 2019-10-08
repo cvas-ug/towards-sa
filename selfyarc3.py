@@ -64,25 +64,20 @@ data_transforms = {
 #data_dir = '20190521-case3'
 #data_dir = '20190521-case4'
 
-path = os.path.dirname(__file__)
-print(path)
-path2 = os.path.dirname(path)
-
 #data_dir = '20190611'       #case1and2 real baxter data
 #data_dir = '20190611-case3' #case3 - real baxter data
 #data_dir = '20190611-case4'  #case4 - real baxter data
 
-data_dir = '20190612'       #case1and2 real baxter data including cases3and4 in the training data.
+#data_dir = '20190612'       #case1and2 real baxter data including cases3and4 in the training data.
 #data_dir = '20190612-case3' #case3 - real baxter data including cases3and4 in the training data.
 #data_dir = '20190612-case4' #case4 - real baxter data including cases3and4 in the training data.
 
 #data_dir = '20190612-test' #has only baxter just for test the visualisation
 
-data_dir =  path2 + '/' + data_dir
 #image_datasets = {x: customdataset.ImageFolderWithPaths(os.path.join(data_dir, x),
 #                                          data_transforms[x])
 #                  for x in ['train', 'val']}
-csv_file = '20190925_baxter.csv'
+
 #dataset_group = "ilfgft"
 dataset_group = "fcilfg"
 #dataset_group = "fcfgft"
@@ -560,12 +555,8 @@ for inputs, labels, path, tensorpro in dataloaders['val']:
     plt.show()
 
 #visualize_model(model_arc3)
-# have the confusion matrix.
-#accuracy(model_arc3)
-
-#plt.ioff()
-#plt.show() """
-
+# have the confusion matrix."""
 accuracy(model_arc3)
+
 plt.ioff()
 plt.show()
