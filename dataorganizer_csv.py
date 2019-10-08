@@ -11,15 +11,28 @@ from numpy.random import RandomState
 # ******************
 DATASET = "20190925"
 folders_class = ["me", "env"]
-dataset_folders = ["fc", "fg"]
+#dataset_folders = ["il", "fg", "ft"] 
+#dataset_folders = ["fc", "il", "fg"]
+#dataset_folders = ["fc", "fg", "ft"]
+dataset_folders = ["fc", "il", "ft"]
 # ******************
 theclass= "baxter"
 # ******************
 csv_file = '20190925.csv'
 validation_split = 0.8
-env_csv = '20190925_env.csv'
-me_csv = '20190925_me.csv'
+#env_csv = '20190925_env_ilfgft.csv'
+#me_csv = '20190925_me_ilfgft.csv'
 
+#env_csv = '20190925_env_fcilfg.csv'
+#me_csv = '20190925_me_fcilfg.csv'
+
+#env_csv = '20190925_env_fcfgft.csv'
+#me_csv = '20190925_me_fcfgft.csv'
+
+env_csv = '20190925_env_fcilft.csv'
+me_csv = '20190925_me_fcilft.csv'
+
+datagroup = "".join(dataset_folders)
 # ******************
 # DO NOT EDIT FROM HERE!!!
 # ******************
@@ -31,7 +44,7 @@ directories = os.listdir(directoryPath + "/" + DATASET)
 
 for aclass in folders_class:
     file_path = data_path +"/"+ DATASET + "/" + DATASET + "_" + aclass + ".csv"
-    with open(DATASET + "_" + aclass + ".csv", mode='w', newline='', encoding='utf-8') as dataset_file:
+    with open(DATASET + datagroup + "/" + DATASET + "_" + aclass + "_" + datagroup + ".csv", mode='w', newline='', encoding='utf-8') as dataset_file:
         dataset_writer = csv.writer(dataset_file, delimiter=',', quotechar='"', quoting=csv.QUOTE_MINIMAL)
         dataset_writer.writerow(['right', 'left', 'disparity', 'proprioception'])
         for folder in dataset_folders:
@@ -79,7 +92,7 @@ def create_datasets(env_csv, me_csv):
     both_classes_training_data = train_me.append(train_env)
     both_classes_test_data = test_me.append(test_env)
 
-    both_classes_training_data.to_csv('train.csv', index=False)
-    both_classes_test_data.to_csv('eval.csv', index=False)
+    both_classes_training_data.to_csv('20190925'+datagroup+'/train.csv', index=False)
+    both_classes_test_data.to_csv('20190925'+datagroup+'/eval.csv', index=False)
 
-create_datasets(env_csv, me_csv)
+create_datasets(DATASET+datagroup+"/"+env_csv, DATASET+datagroup+"/"+me_csv)
