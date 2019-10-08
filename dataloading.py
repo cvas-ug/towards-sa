@@ -20,9 +20,17 @@ torch.manual_seed(current_seed)
 torch.backends.cudnn.deterministic = True
 torch.backends.cudnn.benchmark = False
 
-train_csv = 'train.csv'
-eval_csv = 'eval.csv'
+#train_csv = '20190925ilfgft/train.csv'
+#eval_csv = '20190925ilfgft/eval.csv'
 
+train_csv = '20190925fcilfg/train.csv'
+eval_csv = '20190925fcilfg/eval.csv'
+
+#train_csv = '20190925fcfgft/train.csv'
+#eval_csv = '20190925fcfgft/eval.csv'
+
+#train_csv = '20190925fcilft/train.csv'
+#eval_csv = '20190925fcilft/eval.csv'
 class SADataset(Dataset):
 
     def __init__(self, groupset, transform=None):
