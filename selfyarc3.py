@@ -83,11 +83,15 @@ data_dir =  path2 + '/' + data_dir
 #                                          data_transforms[x])
 #                  for x in ['train', 'val']}
 csv_file = '20190925_baxter.csv'
+#dataset_group = "ilfgft"
+dataset_group = "fcilfg"
+#dataset_group = "fcfgft"
+#dataset_group = "fcilft"
 image_datasets = {x: dataloading.SADataset(x,
                                           data_transforms[x])
                   for x in ['train', 'val']}
-dataloaders = {x: torch.utils.data.DataLoader(image_datasets[x], batch_size=1,
-                                             shuffle=True, num_workers=0)
+dataloaders = {x: torch.utils.data.DataLoader(image_datasets[x], batch_size=64,
+                                             shuffle=True, num_workers=4)
               for x in ['train', 'val']}
 dataset_sizes = {x: len(image_datasets[x]) for x in ['train', 'val']}
 #class_names = image_datasets['train'].classes
@@ -105,7 +109,7 @@ torch.backends.cudnn.deterministic = True
 torch.backends.cudnn.benchmark = False
 
 print("Current seed: {}".format(current_seed))
-print("dataset     : " + data_dir)
+print("dataset     : " + dataset_group)
 
 
 def imshow(inp, title=None):
@@ -367,16 +371,18 @@ def accuracy(model):
         total += labels.size(0)
         correctHits += (outputs == labels).sum().item()
         accuracy = (correctHits/total)*100
-        val = [outputs.item(), labels.item()]
-        print(val)
-        if val == [0, 0]:
-            trueSelf_predictedSelf += 1
-        if val == [1, 0]:
-            trueSelf_predictedEnvironment += 1
-        if val == [0, 1]:
-            trueEnvironment_predictedSelf += 1
-        if val == [1, 1]:
-            trueEnvironment_predictedEnvironment += 1
+        #val = [outputs.item(), labels.item()]
+        values = torch.stack([outputs, labels], -1)
+        for val in values:
+            val = list(val)
+            if val == [0, 0]:
+                trueSelf_predictedSelf += 1
+            if val == [1, 0]:
+                trueSelf_predictedEnvironment += 1
+            if val == [0, 1]:
+                trueEnvironment_predictedSelf += 1
+            if val == [1, 1]:
+                trueEnvironment_predictedEnvironment += 1
     print('Accuracy ={} on total of batch {}'.format(accuracy, total))
     cm = np.array([[trueSelf_predictedSelf, trueSelf_predictedEnvironment],
                 [trueEnvironment_predictedSelf, trueEnvironment_predictedEnvironment]])
@@ -465,7 +471,7 @@ def add_prefix(prefix, path):
 def plt_roc(test_y, probas_y, prefix, plot_micro=False, plot_macro=False):
     assert isinstance(test_y, list) and isinstance(probas_y, list), 'the type of input must be list'
     skplt.metrics.plot_roc(test_y, probas_y, plot_micro=plot_micro, plot_macro=plot_macro)
-    plt.savefig(add_prefix(prefix, 'roc_auc_curve.png'))
+    plt.savefig(add_prefix(prefix, 'roc_auc_curve_'+ dataset_group +'.png'))
     plt.close()
 
 class arch3model(nn.Module):
@@ -495,7 +501,7 @@ model_arc3 = model_arc3.to(device)
 criterion = nn.CrossEntropyLoss()
 
 optimizer_ft = optim.SGD(model_arc3.parameters(), lr=0.001, momentum=0.9)
-
+"""
  # Print model's state_dict
 print("Model's state_dict:")
 for param_tensor in model_arc3.state_dict():
@@ -505,14 +511,15 @@ for param_tensor in model_arc3.state_dict():
 print("Optimizer's state_dict:")
 for var_name in optimizer_ft.state_dict():
     print(var_name, "\t", optimizer_ft.state_dict()[var_name])
-
+"""
 exp_lr_scheduler = lr_scheduler.StepLR(optimizer_ft, step_size=7, gamma=0.1)
-train_mode = False
+train_mode = True
 if train_mode == True:
     model_arc3 = train_model(model_arc3, criterion, optimizer_ft, exp_lr_scheduler, num_epochs=25)
-    torch.save(model_arc3.state_dict(), "model_arc3_save.pth")
+    torch.save(model_arc3.state_dict(), "modelstate/model_arc3_save_20190925_exp"+dataset_group+".pth")
 
-state_dict = torch.load("model_arc3_save.pth")
+"""
+state_dict = torch.load("model_arc3_save_20190925.pth")
 testmodel = arch3model()
 testmodel.load_state_dict(state_dict)
 testmodel.eval()
@@ -557,4 +564,8 @@ for inputs, labels, path, tensorpro in dataloaders['val']:
 #accuracy(model_arc3)
 
 #plt.ioff()
-#plt.show()
+#plt.show() """
+
+accuracy(model_arc3)
+plt.ioff()
+plt.show()
