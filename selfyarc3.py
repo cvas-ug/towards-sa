@@ -78,11 +78,29 @@ data_transforms = {
 #                                          data_transforms[x])
 #                  for x in ['train', 'val']}
 
+# activate/deactivate training
+train_mode = False
+
+# load model state of group
+#exprimentalgroup = "exp1ilfgft"
+#exprimentalgroup = "exp2fcilfg"
+#exprimentalgroup = "exp3fcfgft"
+exprimentalgroup = "exp4fcilft"
+
+# unseen test group
+#test_group = "testgroups/20190925fc.csv"
+#test_group = "testgroups/20190925ft.csv"
+#test_group = "testgroups/20190925il.csv"
+test_group = "testgroups/20190925fg.csv"
+
+# training/eval groups
 #dataset_group = "ilfgft"
-dataset_group = "fcilfg"
+#dataset_group = "fcilfg"
 #dataset_group = "fcfgft"
-#dataset_group = "fcilft"
-image_datasets = {x: dataloading.SADataset(x,
+dataset_group = "fcilft"
+
+
+image_datasets = {x: dataloading.SADataset(x, test_group,
                                           data_transforms[x])
                   for x in ['train', 'val']}
 dataloaders = {x: torch.utils.data.DataLoader(image_datasets[x], batch_size=64,
@@ -104,7 +122,10 @@ torch.backends.cudnn.deterministic = True
 torch.backends.cudnn.benchmark = False
 
 print("Current seed: {}".format(current_seed))
-print("dataset     : " + dataset_group)
+if test_group:
+    print("dataset     : " + dataset_group + " tested with "+ test_group )
+else:
+    print("dataset     : " + dataset_group)
 
 
 def imshow(inp, title=None):
@@ -240,7 +261,7 @@ def visualize_model(model, num_images=6):
                 images_so_far += 1
                 ax = plt.subplot(num_images//2, 2, images_so_far)
                 ax.axis('off')
-                ax.set_title('predicted: {}'.format(class_names[preds[j]]))
+                ax.set_title('predicted: {}'.format(labels[0]))#class_names[preds[j]]))
                 imshow(inputs.cpu().data[j])
 
                 if images_so_far == num_images:
@@ -508,19 +529,19 @@ for var_name in optimizer_ft.state_dict():
     print(var_name, "\t", optimizer_ft.state_dict()[var_name])
 """
 exp_lr_scheduler = lr_scheduler.StepLR(optimizer_ft, step_size=7, gamma=0.1)
-train_mode = True
+
 if train_mode == True:
     model_arc3 = train_model(model_arc3, criterion, optimizer_ft, exp_lr_scheduler, num_epochs=25)
     torch.save(model_arc3.state_dict(), "modelstate/model_arc3_save_20190925_exp"+dataset_group+".pth")
-
-"""
-state_dict = torch.load("model_arc3_save_20190925.pth")
-testmodel = arch3model()
-testmodel.load_state_dict(state_dict)
-testmodel.eval()
-print(device)
-testmodel.to(device)
-backprop = Backprop(testmodel)
+else:
+    state_dict = torch.load("modelstate/model_arc3_save_20190925_"+ exprimentalgroup +".pth")
+    print("load state : modelstate/model_arc3_save_20190925_"+ exprimentalgroup +".pth")
+    testmodel = arch3model()
+    testmodel.load_state_dict(state_dict)
+    testmodel.eval()
+    print(device)
+    testmodel.to(device)
+    backprop = Backprop(testmodel)
 
 #image = load_image('/home/ali/Pytorchwork/20190612/val/baxter/images/20190607_image11638_1559912512.jpg')#/content/images/great_grey_owl.jpg')
 #pro = load_image('/home/ali/Pytorchwork/20190612/val/baxter/pro/20190607_pro313_1559909173.yaml')
@@ -528,7 +549,7 @@ backprop = Backprop(testmodel)
 #plt.title('Original image')
 #plt.axis('off')
 #plt.pause(3)
-
+"""
 for inputs, labels, path, tensorpro in dataloaders['val']:
     inputsfrompath = apply_transforms(load_image(path[0]))
     inputsfrompath =  inputsfrompath.to(device)
@@ -553,10 +574,10 @@ for inputs, labels, path, tensorpro in dataloaders['val']:
     backprop.visualize(inputsfrompath, proprioception, class_index, guided=True, use_gpu=True)
     plt.ioff()
     plt.show()
-
+"""
 #visualize_model(model_arc3)
-# have the confusion matrix."""
-accuracy(model_arc3)
+# have the confusion matrix.
+accuracy(testmodel)
 
 plt.ioff()
 plt.show()
