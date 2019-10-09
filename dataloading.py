@@ -33,11 +33,15 @@ eval_csv = '20190925fcilfg/eval.csv'
 #eval_csv = '20190925fcilft/eval.csv'
 class SADataset(Dataset):
 
-    def __init__(self, groupset, transform=None):
-        if groupset == "train":
-            csv_file = train_csv
+    def __init__(self, groupset, testset=None, transform=None):
+        if testset == None:
+            if groupset == "train":
+                csv_file = train_csv
+            else:
+                csv_file = eval_csv
         else:
-            csv_file = eval_csv
+            #to do: only load test data for eval groupset when using test dataset
+            csv_file = testset
         #iter_csv = pd.read_csv(csv_file, iterator=True)
         #df = pd.concat([chunk[chunk['set'] == trainorval] for chunk in iter_csv])
         self.csv_file = csv_file
