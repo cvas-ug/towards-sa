@@ -96,3 +96,41 @@ def create_datasets(env_csv, me_csv):
     both_classes_test_data.to_csv('20190925'+datagroup+'/eval.csv', index=False)
 
 create_datasets(DATASET+datagroup+"/"+env_csv, DATASET+datagroup+"/"+me_csv)
+
+# Create a csv file to be used as test group. 
+#
+def create_test_only_dataset(groupname, testfolder="testgroups"):
+        testdir = "testgroups"
+        with open(testdir + '/' + DATASET + groupname + ".csv", mode='w', newline='', encoding='utf-8') as dataset_file:
+            dataset_writer = csv.writer(dataset_file, delimiter=',', quotechar='"', quoting=csv.QUOTE_MINIMAL)
+            dataset_writer.writerow(['right', 'left', 'disparity', 'proprioception'])
+            for aclass in folders_class:
+                base_names = []
+                directory = os.fsencode(data_path +"/"+ DATASET + "/images_right_" + groupname + aclass)
+                for file in os.listdir(directory):
+                    filename = os.fsdecode(file)
+                    if filename.endswith(".jpg"):
+                        #print(filename[:-4])
+                        base_names.append(filename[:-4])
+                        continue
+                    else:
+                        continue
+
+                base_names.sort()
+                for name in base_names:
+                    img_right_path = data_path +"/"+ DATASET + "/images_right_"+groupname+aclass+"/"+ name + ".jpg"
+
+                    img_left_path = data_path +"/"+ DATASET + "/images_left_"+groupname+aclass+"/"+ name + ".jpg"
+                    img_left_path = img_left_path.replace("imageright","imageleft")
+
+                    img_disparity = data_path +"/"+ DATASET + "/images_disparity_"+groupname+aclass+"/"+ name +".yaml"
+                    img_disparity = img_disparity.replace("imageright","disparity")
+
+                    pro_path = data_path +"/"+ DATASET + "/" + "pro_"+groupname+aclass+"/"+ name + ".yaml"
+                    pro_path = pro_path.replace("imageright","pro")
+                    
+                    dataset_writer.writerow([img_right_path, img_left_path, img_disparity, pro_path])
+
+# create test csv group
+create_test_only_dataset("ft")
+print("Test dataset csv, created!")
