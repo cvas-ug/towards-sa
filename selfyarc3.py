@@ -21,6 +21,7 @@ import scikitplot as skplt
 
 from flashtorch.utils import apply_transforms, load_image
 from flashtorch.saliency import Backprop
+from flashtorch.activmax import GradientAscent
 
 plt.ion()   # interactive mode
 
@@ -84,20 +85,20 @@ train_mode = False
 # load model state of group
 #exprimentalgroup = "exp1ilfgft"
 #exprimentalgroup = "exp2fcilfg"
-exprimentalgroup = "exp3fcfgft"
-#exprimentalgroup = "exp4fcilft"
+#exprimentalgroup = "exp3fcfgft"
+exprimentalgroup = "exp4fcilft"
 
 # unseen test group
 #test_group = "testgroups/20190925fc.csv"
 #test_group = "testgroups/20190925ft.csv"
-test_group = "testgroups/20190925il.csv"
-#test_group = "testgroups/20190925fg.csv"
+#test_group = "testgroups/20190925il.csv"
+test_group = "testgroups/20190925fg.csv"
 
 # training/eval groups
 #dataset_group = "ilfgft"
 #dataset_group = "fcilfg"
-dataset_group = "fcfgft"
-#dataset_group = "fcilft"
+#dataset_group = "fcfgft"
+dataset_group = "fcilft"
 
 
 image_datasets = {x: dataloading.SADataset(x, test_group,
@@ -510,7 +511,8 @@ class arch3model(nn.Module):
         x = self.fc2(x)
         return x
 
-def visualise_max_gradient():
+def visualise_max_gradient(testmodel):
+    backprop = Backprop(testmodel)
     for inputs, labels, path, tensorpro in dataloaders['val']:
         inputsfrompath = apply_transforms(load_image(path[0]))
         inputsfrompath =  inputsfrompath.to(device)
@@ -536,6 +538,37 @@ def visualise_max_gradient():
         backprop.visualize(inputsfrompath, proprioception, class_index, guided=True, use_gpu=True)
         plt.ioff()
         plt.show()
+
+
+def show_activation(testmodel):
+    #list(testmodel.features.named_children())
+    g_ascent =  GradientAscent(testmodel.model_ft)
+    g_ascent.use_gpu = True
+
+    conv1_1 = testmodel.model_ft.layer1[0].conv1
+    conv1_1_filters = [17, 33, 34, 57]
+    
+    conv1_2 = testmodel.model_ft.layer1[0].conv2
+    conv1_2_filters = [17, 33, 34, 57]
+
+    conv2_1 = testmodel.model_ft.layer2[0].conv1
+    conv2_1_filters = [27, 40, 68, 73]
+
+    conv3_1 = testmodel.model_ft.layer3[0].conv1
+    conv3_1_filters = [31, 61, 147, 182]
+
+    conv4_1 = testmodel.model_ft.layer4[0].conv1
+    conv4_1_filters = [238, 251, 338, 495]
+
+
+
+    g_ascent.visualize(conv1_1, conv1_1_filters, title="conv1_1")
+    g_ascent.visualize(conv1_2, conv1_2_filters, title="conv1_2")
+    g_ascent.visualize(conv2_1, conv2_1_filters, title="conv2_1") 
+    g_ascent.visualize(conv3_1, conv3_1_filters, title="conv3_1") 
+    g_ascent.visualize(conv4_1, conv4_1_filters, title="conv4_1")
+
+
 
 
 if __name__ == "__main__":   
@@ -569,7 +602,7 @@ if __name__ == "__main__":
         testmodel.eval()
         print(device)
         testmodel.to(device)
-        backprop = Backprop(testmodel)
+        
 
     # show images with their predictions
     #visualize_model(testmodel)
@@ -579,7 +612,11 @@ if __name__ == "__main__":
 
     # visualise using flashtorch (saliency maps)
     # works only with "batch_size=1 and num_workers=0"
-    visualise_max_gradient() 
+    visualise_max_gradient(testmodel)
+
+    # activation maximization, get a patterns
+    #show_activation(testmodel)
+
 
     plt.ioff()
     plt.show()
