@@ -84,27 +84,27 @@ train_mode = False
 # load model state of group
 #exprimentalgroup = "exp1ilfgft"
 #exprimentalgroup = "exp2fcilfg"
-#exprimentalgroup = "exp3fcfgft"
-exprimentalgroup = "exp4fcilft"
+exprimentalgroup = "exp3fcfgft"
+#exprimentalgroup = "exp4fcilft"
 
 # unseen test group
 #test_group = "testgroups/20190925fc.csv"
 #test_group = "testgroups/20190925ft.csv"
-#test_group = "testgroups/20190925il.csv"
-test_group = "testgroups/20190925fg.csv"
+test_group = "testgroups/20190925il.csv"
+#test_group = "testgroups/20190925fg.csv"
 
 # training/eval groups
 #dataset_group = "ilfgft"
 #dataset_group = "fcilfg"
-#dataset_group = "fcfgft"
-dataset_group = "fcilft"
+dataset_group = "fcfgft"
+#dataset_group = "fcilft"
 
 
 image_datasets = {x: dataloading.SADataset(x, test_group,
                                           data_transforms[x])
                   for x in ['train', 'val']}
-dataloaders = {x: torch.utils.data.DataLoader(image_datasets[x], batch_size=64,
-                                             shuffle=True, num_workers=4)
+dataloaders = {x: torch.utils.data.DataLoader(image_datasets[x], batch_size=1,
+                                             shuffle=True, num_workers=0)
               for x in ['train', 'val']}
 dataset_sizes = {x: len(image_datasets[x]) for x in ['train', 'val']}
 #class_names = image_datasets['train'].classes
@@ -261,7 +261,7 @@ def visualize_model(model, num_images=6):
                 images_so_far += 1
                 ax = plt.subplot(num_images//2, 2, images_so_far)
                 ax.axis('off')
-                ax.set_title('predicted: {}'.format(labels[0]))#class_names[preds[j]]))
+                ax.set_title('predicted: {}, label: {}'.format(preds.cpu().data[j], labels.cpu().data[j]))#class_names[preds[j]]))
                 imshow(inputs.cpu().data[j])
 
                 if images_so_far == num_images:
@@ -510,74 +510,76 @@ class arch3model(nn.Module):
         x = self.fc2(x)
         return x
 
+def visualise_max_gradient():
+    for inputs, labels, path, tensorpro in dataloaders['val']:
+        inputsfrompath = apply_transforms(load_image(path[0]))
+        inputsfrompath =  inputsfrompath.to(device)
+        inputs = inputs.to(device)
+        inputs.requires_grad = True
+        labels = labels.to(device)
+        proprioception = tensorpro.to(device)
+        proprioceptionge = proprioception
+        proprioceptionge.requires_grad = True
 
-model_arc3 = arch3model()
-model_arc3 = model_arc3.to(device)
+        #class_index = class_names.index('baxter')
+        class_index = labels
 
-criterion = nn.CrossEntropyLoss()
+        #Calculate the gradients of each pixel w.r.t. the input image
+        #the maximum of the gradients for each pixel across colour channels.
+        backprop.visualize(inputs, proprioception, class_index, guided=True, use_gpu=True)
+        print(labels)
+        plt.ioff()
+        plt.show()
+        backprop.visualize(inputs, proprioceptionge, class_index, guided=True, use_gpu=True)
+        plt.ioff()
+        plt.show()
+        backprop.visualize(inputsfrompath, proprioception, class_index, guided=True, use_gpu=True)
+        plt.ioff()
+        plt.show()
 
-optimizer_ft = optim.SGD(model_arc3.parameters(), lr=0.001, momentum=0.9)
-"""
- # Print model's state_dict
-print("Model's state_dict:")
-for param_tensor in model_arc3.state_dict():
-    print(param_tensor, "\t", model_arc3.state_dict()[param_tensor].size())
 
-    # Print optimizer's state_dict
-print("Optimizer's state_dict:")
-for var_name in optimizer_ft.state_dict():
-    print(var_name, "\t", optimizer_ft.state_dict()[var_name])
-"""
-exp_lr_scheduler = lr_scheduler.StepLR(optimizer_ft, step_size=7, gamma=0.1)
+if __name__ == "__main__":   
+    model_arc3 = arch3model()
+    model_arc3 = model_arc3.to(device)
 
-if train_mode == True:
-    model_arc3 = train_model(model_arc3, criterion, optimizer_ft, exp_lr_scheduler, num_epochs=25)
-    torch.save(model_arc3.state_dict(), "modelstate/model_arc3_save_20190925_exp"+dataset_group+".pth")
-else:
-    state_dict = torch.load("modelstate/model_arc3_save_20190925_"+ exprimentalgroup +".pth")
-    print("load state : modelstate/model_arc3_save_20190925_"+ exprimentalgroup +".pth")
-    testmodel = arch3model()
-    testmodel.load_state_dict(state_dict)
-    testmodel.eval()
-    print(device)
-    testmodel.to(device)
-    backprop = Backprop(testmodel)
+    criterion = nn.CrossEntropyLoss()
 
-#image = load_image('/home/ali/Pytorchwork/20190612/val/baxter/images/20190607_image11638_1559912512.jpg')#/content/images/great_grey_owl.jpg')
-#pro = load_image('/home/ali/Pytorchwork/20190612/val/baxter/pro/20190607_pro313_1559909173.yaml')
-#plt.imshow(image)
-#plt.title('Original image')
-#plt.axis('off')
-#plt.pause(3)
-"""
-for inputs, labels, path, tensorpro in dataloaders['val']:
-    inputsfrompath = apply_transforms(load_image(path[0]))
-    inputsfrompath =  inputsfrompath.to(device)
-    inputs = inputs.to(device)
-    inputs.requires_grad = True
-    labels = labels.to(device)
-    proprioception = tensorpro.to(device)
-    proprioceptionge = proprioception
-    proprioceptionge.requires_grad = True
+    optimizer_ft = optim.SGD(model_arc3.parameters(), lr=0.001, momentum=0.9)
+    """
+    # Print model's state_dict
+    print("Model's state_dict:")
+    for param_tensor in model_arc3.state_dict():
+        print(param_tensor, "\t", model_arc3.state_dict()[param_tensor].size())
 
-    #class_index = class_names.index('baxter')
-    class_index = labels
+        # Print optimizer's state_dict
+    print("Optimizer's state_dict:")
+    for var_name in optimizer_ft.state_dict():
+        print(var_name, "\t", optimizer_ft.state_dict()[var_name])
+    """
+    exp_lr_scheduler = lr_scheduler.StepLR(optimizer_ft, step_size=7, gamma=0.1)
 
-    #Calculate the gradients of each pixel w.r.t. the input image
-    #the maximum of the gradients for each pixel across colour channels.
-    backprop.visualize(inputs, proprioception, class_index, guided=True, use_gpu=True)
+    if train_mode == True:
+        model_arc3 = train_model(model_arc3, criterion, optimizer_ft, exp_lr_scheduler, num_epochs=25)
+        torch.save(model_arc3.state_dict(), "modelstate/model_arc3_save_20190925_exp"+dataset_group+".pth")
+    else:
+        state_dict = torch.load("modelstate/model_arc3_save_20190925_"+ exprimentalgroup +".pth")
+        print("load state : modelstate/model_arc3_save_20190925_"+ exprimentalgroup +".pth")
+        testmodel = arch3model()
+        testmodel.load_state_dict(state_dict)
+        testmodel.eval()
+        print(device)
+        testmodel.to(device)
+        backprop = Backprop(testmodel)
+
+    # show images with their predictions
+    #visualize_model(testmodel)
+
+    # generate confusion matrix and ROC.
+    #accuracy(testmodel)
+
+    # visualise using flashtorch (saliency maps)
+    # works only with "batch_size=1 and num_workers=0"
+    visualise_max_gradient() 
+
     plt.ioff()
     plt.show()
-    backprop.visualize(inputs, proprioceptionge, class_index, guided=True, use_gpu=True)
-    plt.ioff()
-    plt.show()
-    backprop.visualize(inputsfrompath, proprioception, class_index, guided=True, use_gpu=True)
-    plt.ioff()
-    plt.show()
-"""
-#visualize_model(model_arc3)
-# have the confusion matrix.
-accuracy(testmodel)
-
-plt.ioff()
-plt.show()
