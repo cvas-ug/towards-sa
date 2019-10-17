@@ -572,7 +572,7 @@ def show_activation(testmodel):
         #print('optimized image:', output[-1].shape)
         tensor_image = output[-1]
         tens = tensor_image
-        torchvision.utils.save_image(tens, add_prefix("filters", "filter"+str(filter_no)+".png"), normalize=False)
+        torchvision.utils.save_image(tens, add_prefix("filters", "filter"+str(filter_no)+".png"), normalize=True)
 
 
 if __name__ == "__main__":   
