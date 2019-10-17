@@ -552,23 +552,27 @@ def show_activation(testmodel):
     conv1_2_filters = [17, 33, 34, 57]
 
     conv2_1 = testmodel.model_ft.layer2[0].conv1
-    conv2_1_filters = [27, 40, 68, 73]
+    conv2_1_filters = [17, 33, 34, 57]
 
     conv3_1 = testmodel.model_ft.layer3[0].conv1
-    conv3_1_filters = [31, 61, 147, 182]
+    conv3_1_filters = [17, 33, 34, 57]
 
-    conv4_1 = testmodel.model_ft.layer4[0].conv1
-    conv4_1_filters = [238, 251, 338, 495]
-
-
-
-    g_ascent.visualize(conv1_1, conv1_1_filters, title="conv1_1")
-    g_ascent.visualize(conv1_2, conv1_2_filters, title="conv1_2")
-    g_ascent.visualize(conv2_1, conv2_1_filters, title="conv2_1") 
-    g_ascent.visualize(conv3_1, conv3_1_filters, title="conv3_1") 
-    g_ascent.visualize(conv4_1, conv4_1_filters, title="conv4_1")
+    conv4_2 = testmodel.model_ft.layer4[1].conv2
+    conv4_2_filters = [7, 11, 63, 197, 203, 336, 438]
 
 
+
+    #g_ascent.visualize(conv1_1, conv1_1_filters, title="conv1_1")
+    #g_ascent.visualize(conv1_2, conv1_2_filters, title="conv1_2")
+    #g_ascent.visualize(conv2_1, conv2_1_filters, title="conv2_1") 
+    #g_ascent.visualize(conv4_2, conv4_2_filters, title="conv4_2") 
+    for filter_no in range(0,511):
+        output = g_ascent.visualize(conv4_2, filter_no, title="conv4_2", return_output=True)
+        #print('num_iter:', len(output))
+        #print('optimized image:', output[-1].shape)
+        tensor_image = output[-1]
+        tens = tensor_image
+        torchvision.utils.save_image(tens, add_prefix("filters", "filter"+str(filter_no)+".png"), normalize=False)
 
 
 if __name__ == "__main__":   
@@ -612,10 +616,10 @@ if __name__ == "__main__":
 
     # visualise using flashtorch (saliency maps)
     # works only with "batch_size=1 and num_workers=0"
-    visualise_max_gradient(testmodel)
+    # visualise_max_gradient(testmodel)
 
     # activation maximization, get a patterns
-    #show_activation(testmodel)
+    show_activation(testmodel)
 
 
     plt.ioff()
