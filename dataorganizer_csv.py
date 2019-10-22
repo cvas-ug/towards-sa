@@ -1,6 +1,7 @@
 import csv
 import os
 import pandas as pd
+import numpy as np
 
 from numpy.random import RandomState
 
@@ -135,14 +136,47 @@ def create_test_only_dataset(groupname, testfolder="testgroups"):
 
 
 def create_case3and4_dataset(dataintofourdivisions):
-    dataframe_me = pd.read_csv(dataintofourdivisions)
-    env_records = dataframe_me.loc[dataframe_me.right.str.contains('/20190925/images_right_*.*env/'), :]
-   
+    dataframe = pd.read_csv(dataintofourdivisions)
+    env_records = dataframe.loc[dataframe.right.str.contains('images_right_*.*env'), :]
+    me_records = dataframe.loc[dataframe.right.str.contains('images_right_*.*me'), :]
+
+    split_into_cases(me_records, env_records)
 
     testdir = "20190925fcfgft_fourcases"
 
+def split_into_cases(me_df, env_df, case1_percent=.25, case2_percent=.25, case3_percent=.25, case4_percent=.25, seed=None):
+    np.random.seed(seed)    
+    if len(me_df.index) < len(env_df.index):
+        m = len(me_df.index)
+    else:
+        m = len(env_df.index)
 
+    perm = np.random.permutation(me_df.index[:m])
+    case1 = int(case1_percent * m)
+    case2 = int(case2_percent * m)
+    case3 = int(case3_percent * m)
+    case4 = int(case4_percent * m)
+    me_c1 = me_df.iloc[perm[:case1]]
+    me_c2 = me_df.iloc[perm[case1:case2+case3]]
+    me_c3 = me_df.iloc[perm[case2+case3:case2+case3+case4]]
+    me_c4 = me_df.iloc[perm[case2+case3+case4:case2+case3+case4+case1]]
 
+    env_df = env_df.reset_index()
+    eperm = np.random.permutation(env_df.index)
+    #m = len(df.index)
+    env_c1 = env_df.iloc[eperm[:case1]]
+    env_c2 = env_df.iloc[eperm[case1:case2+case3]]
+    env_c3 = env_df.iloc[eperm[case2+case3:case2+case3+case4]]
+    env_c4 = env_df.iloc[eperm[case2+case3+case4:case2+case3+case4+case1]]
+
+    return me_c1, env_c1, join_case(me=me_c3,env=env_c3), join_case(me=me_c4,env=env_c4)
+
+def join_case(me,env):
+    print(me)
+    print("--------")
+    print(env)
+    all = me+env
+    print(all)
 
 # mapping to csv by generate two classes files 
 #datasetfolder_tocsv()
@@ -155,4 +189,5 @@ def create_case3and4_dataset(dataintofourdivisions):
 
 # divide the training dataset into four cases
 create_case3and4_dataset(dataintofourdivisions="20190925fcfgft/train.csv")
+#create_case3and4_dataset(dataintofourdivisions="20190925fcfgft/20190925_me_fcfgft.csv")
 print("four cases csv file, created!")
