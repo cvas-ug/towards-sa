@@ -14,8 +14,8 @@ DATASET = "20190925"
 folders_class = ["me", "env"]
 #dataset_folders = ["il", "fg", "ft"] 
 #dataset_folders = ["fc", "il", "fg"]
-#dataset_folders = ["fc", "fg", "ft"]
-dataset_folders = ["fc", "il", "ft"]
+dataset_folders = ["fc", "fg", "ft"]
+#dataset_folders = ["fc", "il", "ft"]
 # ******************
 theclass= "baxter"
 # ******************
@@ -30,8 +30,8 @@ validation_split = 0.8
 #env_csv = '20190925_env_fcfgft.csv'
 #me_csv = '20190925_me_fcfgft.csv'
 
-env_csv = '20190925_env_fcilft.csv'
-me_csv = '20190925_me_fcilft.csv'
+#env_csv = '20190925_env_fcilft.csv'
+#me_csv = '20190925_me_fcilft.csv'
 
 datagroup = "".join(dataset_folders)
 # ******************
@@ -161,22 +161,25 @@ def split_into_cases(me_df, env_df, case1_percent=.25, case2_percent=.25, case3_
     me_c3 = me_df.iloc[perm[case2+case3:case2+case3+case4]]
     me_c4 = me_df.iloc[perm[case2+case3+case4:case2+case3+case4+case1]]
 
-    env_df = env_df.reset_index()
+    #env_df = env_df.reset_index()
     eperm = np.random.permutation(env_df.index)
     #m = len(df.index)
-    env_c1 = env_df.iloc[eperm[:case1]]
-    env_c2 = env_df.iloc[eperm[case1:case2+case3]]
-    env_c3 = env_df.iloc[eperm[case2+case3:case2+case3+case4]]
-    env_c4 = env_df.iloc[eperm[case2+case3+case4:case2+case3+case4+case1]]
+    env_c1 = env_df.iloc[perm[:case1]]
+    env_c2 = env_df.iloc[perm[case1:case2+case3]]
+    env_c3 = env_df.iloc[perm[case2+case3:case2+case3+case4]]
+    env_c4 = env_df.iloc[perm[case2+case3+case4:case2+case3+case4+case1]]
 
-    return me_c1, env_c1, join_case(me=me_c3,env=env_c3), join_case(me=me_c4,env=env_c4)
+    return me_c1, env_c1, create_case3_and_case4_dataframe(me=me_c3,env=env_c3), create_case3_and_case4_dataframe(me=me_c4,env=env_c4)
+
+def create_case3_and_case4_dataframe(me,env):
+    #case3
+    env['right']= me['right'].values
+    env.to_csv('20190925'+datagroup+'/train_case3.csv', index=False)
 
 def join_case(me,env):
-    print(me)
-    print("--------")
-    print(env)
-    all = me+env
-    print(all)
+    result = pd.concat([me, env])
+    return result
+    #form cases and return them
 
 # mapping to csv by generate two classes files 
 #datasetfolder_tocsv()
