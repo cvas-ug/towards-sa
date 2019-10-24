@@ -140,7 +140,7 @@ def create_case3and4_dataset(dataintofourdivisions):
     env_records = dataframe.loc[dataframe.right.str.contains('images_right_*.*env'), :]
     me_records = dataframe.loc[dataframe.right.str.contains('images_right_*.*me'), :]
 
-    split_into_cases(me_records, env_records)
+    split_into_cases(me_records, env_records, seed=2481)
 
     testdir = "20190925fcfgft_fourcases"
 
@@ -169,17 +169,29 @@ def split_into_cases(me_df, env_df, case1_percent=.25, case2_percent=.25, case3_
     env_c3 = env_df.iloc[perm[case2+case3:case2+case3+case4]]
     env_c4 = env_df.iloc[perm[case2+case3+case4:case2+case3+case4+case1]]
 
-    return me_c1, env_c1, create_case3_and_case4_dataframe(me=me_c3,env=env_c3), create_case3_and_case4_dataframe(me=me_c4,env=env_c4)
+    create_case1_or_case2_csv(me_c1, case=1)
+    create_case1_or_case2_csv(env_c1, case=2) 
+    create_case3_or_case4_csv(me=me_c3, env=env_c3, case=3)
+    create_case3_or_case4_csv(me=me_c4, env=env_c4, case=4)
 
-def create_case3_and_case4_dataframe(me,env):
-    #case3
-    env['right']= me['right'].values
-    env.to_csv('20190925'+datagroup+'/train_case3.csv', index=False)
+def create_case1_or_case2_csv(data, case):
+    data.to_csv('20190925'+datagroup+'/train_case'+str(case)+'.csv', index=False)
 
+def create_case3_or_case4_csv(me, env, case):
+    #case3 is Me image 
+    if case == 3:
+        env['right']= me['right'].values
+    #case4 is Me pro 
+    if case == 4:
+        env['proprioception']= me['proprioception'].values
+
+    env.to_csv('20190925'+datagroup+'/train_case'+str(case)+'.csv', index=False)
+
+
+# join two dataframes into one return them
 def join_case(me,env):
     result = pd.concat([me, env])
     return result
-    #form cases and return them
 
 # mapping to csv by generate two classes files 
 #datasetfolder_tocsv()
