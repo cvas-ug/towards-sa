@@ -219,5 +219,4 @@ def join_case(me,env):
 #print("Test dataset csv, created!")
 
 # divide the training dataset into four cases
-create_case1234_dataset(dataintofourdivisions="20190925fcfgft/train.csv", generate_separate_csv = True)
-#create_case3and4_dataset(dataintofourdivisions="20190925fcfgft/20190925_me_fcfgft.csv")
+create_case1234_dataset(dataintofourdivisions="20190925fcfgft/train.csv", generate_separate_csv = False)
