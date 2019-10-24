@@ -135,16 +135,15 @@ def create_test_only_dataset(groupname, testfolder="testgroups"):
                     dataset_writer.writerow([img_right_path, img_left_path, img_disparity, pro_path])
 
 
-def create_case3and4_dataset(dataintofourdivisions):
+def create_case1234_dataset(dataintofourdivisions, generate_separate_csv):
     dataframe = pd.read_csv(dataintofourdivisions)
     env_records = dataframe.loc[dataframe.right.str.contains('images_right_*.*env'), :]
     me_records = dataframe.loc[dataframe.right.str.contains('images_right_*.*me'), :]
 
-    split_into_cases(me_records, env_records, seed=2481)
+    split_into_cases(me_records, env_records, generate_separate_csv= generate_separate_csv, seed=2481)
 
-    testdir = "20190925fcfgft_fourcases"
 
-def split_into_cases(me_df, env_df, case1_percent=.25, case2_percent=.25, case3_percent=.25, case4_percent=.25, seed=None):
+def split_into_cases(me_df, env_df, case1_percent=.25, case2_percent=.25, case3_percent=.25, case4_percent=.25, generate_separate_csv= False, seed=None):
     np.random.seed(seed)    
     if len(me_df.index) < len(env_df.index):
         m = len(me_df.index)
@@ -169,13 +168,30 @@ def split_into_cases(me_df, env_df, case1_percent=.25, case2_percent=.25, case3_
     env_c3 = env_df.iloc[perm[case2+case3:case2+case3+case4]]
     env_c4 = env_df.iloc[perm[case2+case3+case4:case2+case3+case4+case1]]
 
-    create_case1_or_case2_csv(me_c1, case=1)
-    create_case1_or_case2_csv(env_c1, case=2) 
-    create_case3_or_case4_csv(me=me_c3, env=env_c3, case=3)
-    create_case3_or_case4_csv(me=me_c4, env=env_c4, case=4)
+    if generate_separate_csv:
+        generate_csv(me_c1, case=1)
+        generate_csv(env_c1, case=2) 
+        create_case3_or_case4_csv(me=me_c3, env=env_c3, case=3)
+        create_case3_or_case4_csv(me=me_c4, env=env_c4, case=4)
+        print("Four cases [cas1, case2, case3, and case4] csv files, created!, in "+DATASET + datagroup+" folder")
+    else:
+        env_c3['right']= me_c3['right'].values
+        env_c4['proprioception']= me_c4['proprioception'].values
+        allcases = create_cases1234_csv(me_c1, env_c1, env_c3, env_c4)
+        generate_csv(allcases, "all")
+        print("Four cases [cas1, case2, case3, and case4] csv file in one file, created!, in "+DATASET + datagroup+" folder")
 
-def create_case1_or_case2_csv(data, case):
+
+# concatenate all cases into one traning csv file
+#
+def create_cases1234_csv(case1, case2, case3, case4):
+    result = pd.concat([case1, case2, case3, case4])
+    return result
+
+
+def generate_csv(data, case):
     data.to_csv('20190925'+datagroup+'/train_case'+str(case)+'.csv', index=False)
+
 
 def create_case3_or_case4_csv(me, env, case):
     #case3 is Me image 
@@ -203,6 +219,5 @@ def join_case(me,env):
 #print("Test dataset csv, created!")
 
 # divide the training dataset into four cases
-create_case3and4_dataset(dataintofourdivisions="20190925fcfgft/train.csv")
+create_case1234_dataset(dataintofourdivisions="20190925fcfgft/train.csv", generate_separate_csv = True)
 #create_case3and4_dataset(dataintofourdivisions="20190925fcfgft/20190925_me_fcfgft.csv")
-print("four cases csv file, created!")
