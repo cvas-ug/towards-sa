@@ -12,14 +12,17 @@ from numpy.random import RandomState
 # ******************
 DATASET = "20190925"
 folders_class = ["me", "env"]
-#dataset_folders = ["il", "fg", "ft"] 
+dataset_folders = ["il", "fg", "ft"] 
 #dataset_folders = ["fc", "il", "fg"]
-dataset_folders = ["fc", "fg", "ft"]
+#dataset_folders = ["fc", "fg", "ft"]
 #dataset_folders = ["fc", "il", "ft"]
-# ******************
-theclass= "baxter"
-# ******************
-csv_file = '20190925.csv'
+#Unseen test folders
+#dataset_folders = ["20190925fc"] 
+#dataset_folders = ["20190925il"] 
+#dataset_folders = ["20190925fg"] 
+#dataset_folders = ["20190925ft"]
+
+
 validation_split = 0.8
 #env_csv = '20190925_env_ilfgft.csv'
 #me_csv = '20190925_me_ilfgft.csv'
@@ -33,10 +36,17 @@ validation_split = 0.8
 #env_csv = '20190925_env_fcilft.csv'
 #me_csv = '20190925_me_fcilft.csv'
 
+
+dataset_type = "train"
+#dataset_type = "eval"
+#dataset_type = "20190925fc"
+#dataset_type = "20190925il"
+#dataset_type = "20190925fg"
+#dataset_type = "20190925ft"
+
+
 datagroup = "".join(dataset_folders)
-# ******************
-# DO NOT EDIT FROM HERE!!!
-# ******************
+
 currentWorkingFilePath = os.path.dirname(__file__)
 directoryPath = os.path.dirname(currentWorkingFilePath)
 
@@ -190,7 +200,7 @@ def create_cases1234_csv(case1, case2, case3, case4):
 
 
 def generate_csv(data, case):
-    data.to_csv('20190925'+datagroup+'/train_case'+str(case)+'.csv', index=False)
+    data.to_csv(DATASET+datagroup+'/'+ dataset_type +'_case'+str(case)+'.csv', index=False)
 
 
 def create_case3_or_case4_csv(me, env, case):
@@ -201,7 +211,7 @@ def create_case3_or_case4_csv(me, env, case):
     if case == 4:
         env['proprioception']= me['proprioception'].values
 
-    env.to_csv('20190925'+datagroup+'/train_case'+str(case)+'.csv', index=False)
+    env.to_csv('20190925'+datagroup+'/'+ dataset_type +'_case'+str(case)+'.csv', index=False)
 
 
 # join two dataframes into one return them
@@ -219,4 +229,5 @@ def join_case(me,env):
 #print("Test dataset csv, created!")
 
 # divide the training dataset into four cases
-create_case1234_dataset(dataintofourdivisions="20190925fcfgft/train.csv", generate_separate_csv = False)
+#DATASET = "20190925unseen/" #used during generating unseen test files only
+create_case1234_dataset(dataintofourdivisions=DATASET+datagroup+"/"+dataset_type+".csv", generate_separate_csv = False)
