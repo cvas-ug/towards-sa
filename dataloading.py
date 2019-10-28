@@ -20,17 +20,44 @@ torch.manual_seed(current_seed)
 torch.backends.cudnn.deterministic = True
 torch.backends.cudnn.benchmark = False
 
+##########################################################################
+#
+# The following is the configuration for four groups experiments FC, IL, FG, FT
+# here path to the training was on case1(me) and case2(env)
+#
+##########################################################################
+
 #train_csv = '20190925ilfgft/train.csv'
 #eval_csv = '20190925ilfgft/eval.csv'
 
-train_csv = '20190925fcilfg/train.csv'
-eval_csv = '20190925fcilfg/eval.csv'
+#train_csv = '20190925fcilfg/train.csv'
+#eval_csv = '20190925fcilfg/eval.csv'
 
 #train_csv = '20190925fcfgft/train.csv'
 #eval_csv = '20190925fcfgft/eval.csv'
 
 #train_csv = '20190925fcilft/train.csv'
 #eval_csv = '20190925fcilft/eval.csv'
+
+##########################################################################
+#
+# The following is the configuration for four groups experiments FC, IL, FG, FT
+# here path to the training on case1(me), case2(env), case3(env), and case4(env)
+#
+##########################################################################
+
+#train_csv = '20190925ilfgft/train_caseall.csv'
+#eval_csv = '20190925ilfgft/eval_caseall.csv'
+
+#train_csv = '20190925fcilfg/train_caseall.csv'
+#eval_csv = '20190925fcilfg/eval_caseall.csv'
+
+#train_csv = '20190925fcfgft/train_caseall.csv'
+#eval_csv = '20190925fcfgft/eval_caseall.csv'
+
+train_csv = '20190925fcilft/train_caseall.csv'
+eval_csv = '20190925fcilft/eval_caseall.csv'
+
 class SADataset(Dataset):
 
     def __init__(self, groupset, testset=None, transform=None):
@@ -75,7 +102,7 @@ class SADataset(Dataset):
             tensorpro = torch.tensor(pro)
 
         path = image_right
-        if "env" in image_right:
+        if "env" in image_left:
             target = 1
         else:
             target = 0

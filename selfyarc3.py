@@ -80,32 +80,63 @@ data_transforms = {
 #                  for x in ['train', 'val']}
 
 # activate/deactivate training
-train_mode = False
+train_mode = True
+
+# activate/deactivate testset
+test_group = None
+
+##########################################################################
+#
+# The following is the configuration for four groups experiments FC, IL, FG, FT
+# here the training was on case1(me) and case2(env)
+#
+##########################################################################
 
 # load model state of group
 #exprimentalgroup = "exp1ilfgft"
 #exprimentalgroup = "exp2fcilfg"
 #exprimentalgroup = "exp3fcfgft"
-exprimentalgroup = "exp4fcilft"
+#exprimentalgroup = "exp4fcilft"
 
 # unseen test group
-#test_group = "testgroups/20190925fc.csv"
-#test_group = "testgroups/20190925ft.csv"
-#test_group = "testgroups/20190925il.csv"
-test_group = "testgroups/20190925fg.csv"
+#test_group = "20190925unseen/20190925fc/20190925fc.csv"
+#test_group = "20190925unseen/20190925ft/20190925ft.csv"
+#test_group = "20190925unseen/20190925il/20190925il.csv"
+#test_group = "20190925unseen/20190925fg/20190925fg.csv"
 
 # training/eval groups
 #dataset_group = "ilfgft"
 #dataset_group = "fcilfg"
 #dataset_group = "fcfgft"
-dataset_group = "fcilft"
+#dataset_group = "fcilft"
+
+##########################################################################
+#
+# The following is the configuration for four groups experiments FC, IL, FG, FT
+# here the training was on case1(me), case2(env), case3(env), and case4(env)
+#
+##########################################################################
+
+# training/eval groups
+#dataset_group = "ilfgft_caseall"
+#dataset_group = "fcilfg_caseall"
+#dataset_group = "fcfgft_caseall"
+dataset_group = "fcilft_caseall"
+
+# unseen test group with all cases
+#test_group = "20190925unseen/20190925fc/20190925fc_caseall.csv"
+#test_group = "20190925unseen/20190925ft/20190925ft_caseall.csv"
+#test_group = "20190925unseen/20190925il/20190925il_caseall.csv"
+#test_group = "20190925unseen/20190925fg/20190925fg_caseall.csv"
+
+#exprimentalgroup = "expilfgft_caseall"
 
 
 image_datasets = {x: dataloading.SADataset(x, test_group,
                                           data_transforms[x])
                   for x in ['train', 'val']}
-dataloaders = {x: torch.utils.data.DataLoader(image_datasets[x], batch_size=1,
-                                             shuffle=True, num_workers=0)
+dataloaders = {x: torch.utils.data.DataLoader(image_datasets[x], batch_size=64,
+                                             shuffle=True, num_workers=4)
               for x in ['train', 'val']}
 dataset_sizes = {x: len(image_datasets[x]) for x in ['train', 'val']}
 #class_names = image_datasets['train'].classes
@@ -619,7 +650,7 @@ if __name__ == "__main__":
     # visualise_max_gradient(testmodel)
 
     # activation maximization, get a patterns
-    show_activation(testmodel)
+    #show_activation(testmodel)
 
 
     plt.ioff()
