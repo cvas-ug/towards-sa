@@ -80,10 +80,10 @@ data_transforms = {
 #                  for x in ['train', 'val']}
 
 # activate/deactivate training
-train_mode = True
+train_mode = False
 
 # activate/deactivate testset
-test_group = None
+#test_group = None
 
 ##########################################################################
 #
@@ -118,25 +118,54 @@ test_group = None
 ##########################################################################
 
 # training/eval groups
-#dataset_group = "ilfgft_caseall"
+dataset_group = "ilfgft_caseall"
 #dataset_group = "fcilfg_caseall"
 #dataset_group = "fcfgft_caseall"
-dataset_group = "fcilft_caseall"
+#dataset_group = "fcilft_caseall"
 
 # unseen test group with all cases
-#test_group = "20190925unseen/20190925fc/20190925fc_caseall.csv"
+test_group = "20190925unseen/20190925fc/20190925fc_caseall.csv"
 #test_group = "20190925unseen/20190925ft/20190925ft_caseall.csv"
 #test_group = "20190925unseen/20190925il/20190925il_caseall.csv"
 #test_group = "20190925unseen/20190925fg/20190925fg_caseall.csv"
 
-#exprimentalgroup = "expilfgft_caseall"
+# unseen test group with separate cases
+#test_group = "20190925unseen/20190925fc/20190925fc_case1.csv"
+#test_group = "20190925unseen/20190925fc/20190925fc_case2.csv"
+#test_group = "20190925unseen/20190925fc/20190925fc_case3.csv"
+#test_group = "20190925unseen/20190925fc/20190925fc_case4.csv" #%18
+
+#test_group = "20190925unseen/20190925ft/20190925ft_case1.csv"
+#test_group = "20190925unseen/20190925ft/20190925ft_case2.csv"
+#test_group = "20190925unseen/20190925ft/20190925ft_case3.csv"
+#test_group = "20190925unseen/20190925ft/20190925ft_case4.csv" #%98
+
+#test_group = "20190925unseen/20190925il/20190925il_case1.csv"
+#test_group = "20190925unseen/20190925il/20190925il_case2.csv"
+#test_group = "20190925unseen/20190925il/20190925il_case3.csv"
+#test_group = "20190925unseen/20190925il/20190925il_case4.csv" #%28
+
+#test_group = "20190925unseen/20190925fg/20190925fg_case1.csv"
+#test_group = "20190925unseen/20190925fg/20190925fg_case2.csv"
+#test_group = "20190925unseen/20190925fg/20190925fg_case3.csv"
+#test_group = "20190925unseen/20190925fg/20190925fg_case4.csv" #%89
+
+#test_group = "saliency/case1/case1.csv"
+#test_group = "saliency/case2/case2.csv"
+#test_group = "saliency/case3/case3.csv"
+#test_group = "saliency/case4/case4.csv"
+
+exprimentalgroup = "expilfgft_caseall"
+#exprimentalgroup = "expfcilfg_caseall"
+#exprimentalgroup = "expfcfgft_caseall"
+#exprimentalgroup = "expfcilft_caseall"
 
 
 image_datasets = {x: dataloading.SADataset(x, test_group,
                                           data_transforms[x])
                   for x in ['train', 'val']}
-dataloaders = {x: torch.utils.data.DataLoader(image_datasets[x], batch_size=64,
-                                             shuffle=True, num_workers=4)
+dataloaders = {x: torch.utils.data.DataLoader(image_datasets[x], batch_size=1,
+                                             shuffle=True, num_workers=0)
               for x in ['train', 'val']}
 dataset_sizes = {x: len(image_datasets[x]) for x in ['train', 'val']}
 #class_names = image_datasets['train'].classes
@@ -476,7 +505,7 @@ def accuracy(model):
 
     #When it is actually env, how often does it predicted env (TNR).
     #Specificity
-    tnr = tn / n
+    tnr = ( tn / n ) if n != 0 else 0
     print("Specificity - true nigative rate (TNR) = {}".format(tnr))
 
     #when predict self, how often it is correct.
@@ -492,22 +521,27 @@ def confusionMatrix(cm, accuracy, total):
     target_names = ['Self', 'Environment']
     title = "Confusion Matrix Arch3" + ':Accuracy ={} on total of batch {}'.format(accuracy, total)
     cmap = "Greens"
-
+    from matplotlib.ticker import MultipleLocator
     if cmap is None:
         cmap = plt.get_cmap("Blues")
 
-    plt.figure()
+    fig = plt.figure()
+    ax = fig.add_subplot(111)
     plt.imshow(cm, interpolation='nearest', cmap=cmap)
     plt.title(title, fontsize=9, color='red')
     plt.colorbar()
-    if target_names is not None:
-        tick_marks = np.arange(len(target_names))
-        plt.xticks(tick_marks, target_names)  #, rotation=45)
-        plt.yticks(tick_marks, target_names)
+    ax.xaxis.set_major_locator(MultipleLocator(1))
+    ax.yaxis.set_major_locator(MultipleLocator(1))
+    ax.set_xticklabels([''] + target_names)
+    ax.set_yticklabels([''] + target_names, rotation=65)
+    #if target_names is not None:
+    #    tick_marks = np.arange(len(target_names))
+    #    plt.xticks([''], target_names, rotation=45)
+    #    plt.yticks([''], target_names)
     
     thresh = cm.max() / 1.5
     for i, j in itertools.product(range(cm.shape[0]), range(cm.shape[1])):
-        plt.text(j, i, "{:,}".format(cm[i, j]), horizontalalignment="center", color="white" if cm[i, j] > thresh else "black")
+        plt.text(j, i, "{:,}".format(cm[i, j]),  ha="center", va="center", color="white" if cm[i, j] > thresh else "black")
     plt.tight_layout()
     plt.ylabel('True label', fontsize=12, color='blue')
     plt.xlabel('Predicted label', fontsize=12, color='blue')
@@ -544,6 +578,7 @@ class arch3model(nn.Module):
 
 def visualise_max_gradient(testmodel):
     backprop = Backprop(testmodel)
+    i=0
     for inputs, labels, path, tensorpro in dataloaders['val']:
         inputsfrompath = apply_transforms(load_image(path[0]))
         inputsfrompath =  inputsfrompath.to(device)
@@ -559,16 +594,21 @@ def visualise_max_gradient(testmodel):
 
         #Calculate the gradients of each pixel w.r.t. the input image
         #the maximum of the gradients for each pixel across colour channels.
-        backprop.visualize(inputs, proprioception, class_index, guided=True, use_gpu=True)
+        backprop.visualize(inputs, proprioception, class_index, guided=True, use_gpu=False)
         print(labels)
         plt.ioff()
-        plt.show()
-        backprop.visualize(inputs, proprioceptionge, class_index, guided=True, use_gpu=True)
-        plt.ioff()
-        plt.show()
-        backprop.visualize(inputsfrompath, proprioception, class_index, guided=True, use_gpu=True)
-        plt.ioff()
-        plt.show()
+        i+=1
+        print(i)
+        dirctory = "saliency/case4/"
+        case = "1"
+        plt.savefig(dirctory+"train_"+exprimentalgroup+"_test"+case+str(i)+".png")
+        #plt.show()
+        #backprop.visualize(inputs, proprioceptionge, class_index, guided=True, use_gpu=True)
+        #plt.ioff()
+        #plt.show()
+        #backprop.visualize(inputsfrompath, proprioception, class_index, guided=True, use_gpu=True)
+        #plt.ioff()
+        #plt.show()
 
 
 def show_activation(testmodel):
@@ -598,12 +638,55 @@ def show_activation(testmodel):
     #g_ascent.visualize(conv2_1, conv2_1_filters, title="conv2_1") 
     #g_ascent.visualize(conv4_2, conv4_2_filters, title="conv4_2") 
     for filter_no in range(0,511):
-        output = g_ascent.visualize(conv4_2, filter_no, title="conv4_2", return_output=True)
+        output = g_ascent.visualize(conv4_2, filter_no, title=exprimentalgroup+"conv4_2", return_output=True)
         #print('num_iter:', len(output))
         #print('optimized image:', output[-1].shape)
         tensor_image = output[-1]
         tens = tensor_image
-        torchvision.utils.save_image(tens, add_prefix("filters", "filter"+str(filter_no)+".png"), normalize=True)
+        torchvision.utils.save_image(tens, add_prefix("filters/"+exprimentalgroup, exprimentalgroup+"filter"+str(filter_no)+".png"), normalize=True)
+    
+    print("Generate ")
+
+def get_module_weights(exprimentalgroup):
+    #current_model = arch3model()
+    #current_model = current_model.to(device)
+
+    #criterion = nn.CrossEntropyLoss()
+    #optimizer_ft = optim.SGD(model_arc3.parameters(), lr=0.001, momentum=0.9)
+    #exp_lr_scheduler = lr_scheduler.StepLR(optimizer_ft, step_size=7, gamma=0.1)
+
+    state_dict = torch.load("modelstate/model_arc3_save_20190925_"+ exprimentalgroup +".pth")
+    print("load state : modelstate/model_arc3_save_20190925_"+ exprimentalgroup +".pth")
+    loadedmodel = arch3model()
+    loadedmodel.load_state_dict(state_dict)
+    loadedmodel.eval()
+    print(device)
+    loadedmodel.to("cpu")
+
+    #activations = {}
+    #def get_activation(name):
+    #    def hook(model, input, output):
+    #        activations[name] = output.detach()
+    #    return hook
+    
+    model = loadedmodel
+    weights = model.fc2.weight.data.numpy() #model[0].weight.data.numpy()
+    print(weights.shape)
+    #model[0].register_forward_hook(get_activation('layer0_relu'))
+    #torch.manual_seed(7)
+    #x = torch.randn(1, 10)
+    #output = model(x)
+
+    #plt.matshow(activations['layer0_relu'])
+    #print(weights)
+    #plt.matshow(weights)
+
+    #plt.ioff()
+    #plt.show()
+
+    return weights
+
+
 
 
 if __name__ == "__main__":   
@@ -647,11 +730,18 @@ if __name__ == "__main__":
 
     # visualise using flashtorch (saliency maps)
     # works only with "batch_size=1 and num_workers=0"
-    # visualise_max_gradient(testmodel)
+    #visualise_max_gradient(testmodel)
 
     # activation maximization, get a patterns
     #show_activation(testmodel)
 
+    # get weights of saved states
+    exprimentalgroups = ["expilfgft_caseall", "expfcilfg_caseall", "expfcfgft_caseall", "expfcilft_caseall"]
+    all_weights = []
+    for exprimentgroup in exprimentalgroups:
+        weights = get_module_weights(exprimentgroup)
+        all_weights.append(weights)
+    print(all_weights)
 
     plt.ioff()
     plt.show()
