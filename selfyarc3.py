@@ -686,8 +686,73 @@ def get_module_weights(exprimentalgroup):
 
     return weights
 
+def calculate_mutual_information(weights):
+    plt.rcParams['image.cmap'] = 'gray'
+    plt.rcParams['image.interpolation'] = 'nearest'
+    
+    def mutual_info(w1, w2):
+        # fig, axes = plt.subplots(1, 2)
+        # axes[0].hist(w1.ravel(), bins=20)
+        # axes[0].set_title('T1 slice histogram')
+        # axes[1].hist(w2.ravel(), bins=20)
+        # axes[1].set_title('T2 slice histogram')
 
+        # plt.plot(w1.ravel(), w2.ravel(), '.')
+        # plt.xlabel('T1 signal')
+        # plt.ylabel('T2 signal')
+        # plt.title('T1 vs T2 signal')
+        # np.corrcoef(w1.ravel(), w2.ravel())[0, 1]
 
+        # t1_20_30 = (w1 >= 0.0) & (w1 <= 0.30)
+        # fig, axes = plt.subplots(1, 3, figsize=(8, 3))
+        # axes[0].imshow(w1)
+        # axes[0].set_title('T1 slice')
+        # axes[1].imshow(t1_20_30)
+        # axes[1].set_title('20<=T1<=30')
+        # axes[2].imshow(w2)
+        # axes[2].set_title('T2 slice')
+
+        hist_2d, x_edges, y_edges = np.histogram2d(w1.ravel(), w2.ravel(), bins=20)
+        plt.imshow(hist_2d.T, origin='lower')
+        plt.xlabel('T1 signal bin')
+        plt.ylabel('T2 signal bin')
+
+        # hist_2d_log = np.zeros(hist_2d.shape)
+        # non_zeros = hist_2d != 0
+        # hist_2d_log[non_zeros] = np.log(hist_2d[non_zeros])
+        # plt.imshow(hist_2d_log.T, origin='lower')
+        # plt.xlabel('T1 signal bin')
+        # plt.ylabel('T2 signal bin')
+
+        # Mutual information for joint histogram
+        # Convert bins counts to probability values
+        pxy = hist_2d / float(np.sum(hist_2d))
+        px = np.sum(pxy, axis=1)
+        py = np.sum(pxy, axis=0)
+        px_py = px[:, None] * py[None, :]
+        
+        nzs = pxy > 0 
+        return np.sum(pxy[nzs] * np.log(pxy[nzs] / px_py[nzs]))
+
+    
+    count = 0
+    mutual_values = []
+    for w1 in weights:
+        for w2 in weights:
+            mutual_values.append(mutual_info(w1, w2))
+            count+=1
+    return mutual_values
+    
+def plot_table(weights):
+    fig, axs =plt.subplots(2,1)
+    clust_data = (np.array(weights)).reshape(4,4)
+    collabel=("Group1", "Group2", "Group3", "Group4")
+    rowslabel=("Group1", "Group2", "Group3", "Group4")
+    axs[0].axis('tight')
+    axs[0].axis('off')
+    axs[1].axis('off')
+    axs[0].table(cellText=clust_data,rowLabels=rowslabel, colLabels=collabel,loc='center')
+    plt.show()
 
 if __name__ == "__main__":   
     model_arc3 = arch3model()
@@ -741,7 +806,11 @@ if __name__ == "__main__":
     for exprimentgroup in exprimentalgroups:
         weights = get_module_weights(exprimentgroup)
         all_weights.append(weights)
-    print(all_weights)
+   
+    # calculate mutual information, and plot mutul info table
+    mutual_info = calculate_mutual_information(all_weights)
+    plot_table(mutual_info)
 
+    
     plt.ioff()
     plt.show()
