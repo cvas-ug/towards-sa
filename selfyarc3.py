@@ -22,6 +22,7 @@ import scikitplot as skplt
 from flashtorch.utils import apply_transforms, load_image
 from flashtorch.saliency import Backprop
 from flashtorch.activmax import GradientAscent
+import pickle
 
 plt.ion()   # interactive mode
 
@@ -647,7 +648,7 @@ def show_activation(testmodel):
     
     print("Generate ")
 
-def get_module_weights(exprimentalgroup):
+def get_module_weights(exprimentalgroup, layer):
     #current_model = arch3model()
     #current_model = current_model.to(device)
 
@@ -670,7 +671,13 @@ def get_module_weights(exprimentalgroup):
     #    return hook
     
     model = loadedmodel
-    weights = model.fc2.weight.data.numpy() #model[0].weight.data.numpy()
+    if layer == "fc2":
+        weights = model.fc2.weight.data.numpy() #model[0].weight.data.numpy()
+    if layer == "fc0":
+        weights = model.model_ft.fc.weight.data.numpy()
+    if layer == "fc1":
+        weights = model.fc1.weight.data.numpy()
+
     print(weights.shape)
     #model[0].register_forward_hook(get_activation('layer0_relu'))
     #torch.manual_seed(7)
@@ -804,9 +811,12 @@ if __name__ == "__main__":
     exprimentalgroups = ["expilfgft_caseall", "expfcilfg_caseall", "expfcfgft_caseall", "expfcilft_caseall"]
     all_weights = []
     for exprimentgroup in exprimentalgroups:
-        weights = get_module_weights(exprimentgroup)
+        weights = get_module_weights(exprimentgroup, layer="fc2")
         all_weights.append(weights)
-   
+    #with open("fc0_all_group_weights.pkl", "wb") as p:
+    #    pickle.dump(all_weights, p)
+    #with open("fc0_all_group_weights.pkl", "rb") as p:
+    #    ww = pickle.load(p)
     # calculate mutual information, and plot mutul info table
     mutual_info = calculate_mutual_information(all_weights)
     plot_table(mutual_info)
