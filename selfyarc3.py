@@ -724,12 +724,12 @@ def calculate_mutual_information(weights):
         plt.xlabel('T1 signal bin')
         plt.ylabel('T2 signal bin')
 
-        # hist_2d_log = np.zeros(hist_2d.shape)
-        # non_zeros = hist_2d != 0
-        # hist_2d_log[non_zeros] = np.log(hist_2d[non_zeros])
-        # plt.imshow(hist_2d_log.T, origin='lower')
-        # plt.xlabel('T1 signal bin')
-        # plt.ylabel('T2 signal bin')
+        hist_2d_log = np.zeros(hist_2d.shape)
+        non_zeros = hist_2d != 0
+        hist_2d_log[non_zeros] = np.log(hist_2d[non_zeros])
+        plt.imshow(hist_2d_log.T, origin='lower')
+        plt.xlabel('T1 signal bin')
+        plt.ylabel('T2 signal bin')
 
         # Mutual information for joint histogram
         # Convert bins counts to probability values
@@ -739,6 +739,8 @@ def calculate_mutual_information(weights):
         px_py = px[:, None] * py[None, :]
         
         nzs = pxy > 0 
+        plt.ioff()
+        plt.show()
         return np.sum(pxy[nzs] * np.log(pxy[nzs] / px_py[nzs]))
 
     
