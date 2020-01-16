@@ -119,16 +119,16 @@ train_mode = False
 ##########################################################################
 
 # training/eval groups
-dataset_group = "ilfgft_caseall"
+#dataset_group = "ilfgft_caseall"
 #dataset_group = "fcilfg_caseall"
 #dataset_group = "fcfgft_caseall"
-#dataset_group = "fcilft_caseall"
+dataset_group = "fcilft_caseall"
 
 # unseen test group with all cases
-test_group = "20190925unseen/20190925fc/20190925fc_caseall.csv"
+#test_group = "20190925unseen/20190925fc/20190925fc_caseall.csv"
 #test_group = "20190925unseen/20190925ft/20190925ft_caseall.csv"
 #test_group = "20190925unseen/20190925il/20190925il_caseall.csv"
-#test_group = "20190925unseen/20190925fg/20190925fg_caseall.csv"
+test_group = "20190925unseen/20190925fg/20190925fg_caseall.csv"
 
 # unseen test group with separate cases
 #test_group = "20190925unseen/20190925fc/20190925fc_case1.csv"
@@ -603,13 +603,13 @@ def visualise_max_gradient(testmodel):
         dirctory = "saliency/case4/"
         case = "1"
         plt.savefig(dirctory+"train_"+exprimentalgroup+"_test"+case+str(i)+".png")
-        #plt.show()
-        #backprop.visualize(inputs, proprioceptionge, class_index, guided=True, use_gpu=True)
-        #plt.ioff()
-        #plt.show()
-        #backprop.visualize(inputsfrompath, proprioception, class_index, guided=True, use_gpu=True)
-        #plt.ioff()
-        #plt.show()
+        plt.show()
+        backprop.visualize(inputs, proprioceptionge, class_index, guided=True, use_gpu=True)
+        plt.ioff()
+        plt.show()
+        backprop.visualize(inputsfrompath, proprioception, class_index, guided=True, use_gpu=True)
+        plt.ioff()
+        plt.show()
 
 
 def show_activation(testmodel):
@@ -804,24 +804,24 @@ if __name__ == "__main__":
 
     # visualise using flashtorch (saliency maps)
     # works only with "batch_size=1 and num_workers=0"
-    #visualise_max_gradient(testmodel)
+    visualise_max_gradient(testmodel)
 
     # activation maximization, get a patterns
     #show_activation(testmodel)
 
     # get weights of saved states
-    exprimentalgroups = ["expilfgft_caseall", "expfcilfg_caseall", "expfcfgft_caseall", "expfcilft_caseall"]
-    all_weights = []
-    for exprimentgroup in exprimentalgroups:
-        weights = get_module_weights(exprimentgroup, layer="fc2")
-        all_weights.append(weights)
+    #exprimentalgroups = ["expilfgft_caseall", "expfcilfg_caseall", "expfcfgft_caseall", "expfcilft_caseall"]
+    #all_weights = []
+    #for exprimentgroup in exprimentalgroups:
+    #    weights = get_module_weights(exprimentgroup, layer="fc2")
+    #    all_weights.append(weights)
     #with open("fc0_all_group_weights.pkl", "wb") as p:
     #    pickle.dump(all_weights, p)
     #with open("fc0_all_group_weights.pkl", "rb") as p:
     #    ww = pickle.load(p)
     # calculate mutual information, and plot mutul info table
-    mutual_info = calculate_mutual_information(all_weights)
-    plot_table(mutual_info)
+    #mutual_info = calculate_mutual_information(all_weights)
+    #plot_table(mutual_info)
 
     
     plt.ioff()

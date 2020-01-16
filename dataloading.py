@@ -55,8 +55,8 @@ torch.backends.cudnn.benchmark = False
 #train_csv = '20190925fcfgft/train_caseall.csv'
 #eval_csv = '20190925fcfgft/eval_caseall.csv'
 
-train_csv = '20190925fcilft/train_caseall.csv'
-eval_csv = '20190925fcilft/eval_caseall.csv'
+#train_csv = '20190925fcilft/train_caseall.csv'
+#eval_csv = '20190925fcilft/eval_caseall.csv'
 
 class SADataset(Dataset):
 

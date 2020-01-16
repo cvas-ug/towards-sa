@@ -12,7 +12,7 @@ from numpy.random import RandomState
 # ******************
 DATASET = "20190925"
 folders_class = ["me", "env"]
-dataset_folders = ["il", "fg", "ft"] 
+#dataset_folders = ["il", "fg", "ft"] 
 #dataset_folders = ["fc", "il", "fg"]
 #dataset_folders = ["fc", "fg", "ft"]
 #dataset_folders = ["fc", "il", "ft"]
@@ -20,7 +20,7 @@ dataset_folders = ["il", "fg", "ft"]
 #dataset_folders = ["20190925fc"] 
 #dataset_folders = ["20190925il"] 
 #dataset_folders = ["20190925fg"] 
-#dataset_folders = ["20190925ft"]
+dataset_folders = ["20190925ft"]
 
 
 validation_split = 0.8
@@ -37,12 +37,12 @@ validation_split = 0.8
 #me_csv = '20190925_me_fcilft.csv'
 
 
-dataset_type = "train"
+#dataset_type = "train"
 #dataset_type = "eval"
 #dataset_type = "20190925fc"
 #dataset_type = "20190925il"
 #dataset_type = "20190925fg"
-#dataset_type = "20190925ft"
+dataset_type = "20190925ft"
 
 
 datagroup = "".join(dataset_folders)
@@ -211,7 +211,7 @@ def create_case3_or_case4_csv(me, env, case):
     if case == 4:
         env['proprioception']= me['proprioception'].values
 
-    env.to_csv('20190925'+datagroup+'/'+ dataset_type +'_case'+str(case)+'.csv', index=False)
+    env.to_csv(DATASET+datagroup+'/'+ dataset_type +'_case'+str(case)+'.csv', index=False)
 
 
 # join two dataframes into one return them
@@ -229,5 +229,5 @@ def join_case(me,env):
 #print("Test dataset csv, created!")
 
 # divide the training dataset into four cases
-#DATASET = "20190925unseen/" #used during generating unseen test files only
-create_case1234_dataset(dataintofourdivisions=DATASET+datagroup+"/"+dataset_type+".csv", generate_separate_csv = False)
+DATASET = "20190925unseen/" #used during generating unseen test files only
+create_case1234_dataset(dataintofourdivisions=DATASET+datagroup+"/"+dataset_type+".csv", generate_separate_csv = True)
