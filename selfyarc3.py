@@ -156,17 +156,17 @@ test_group = "20190925unseen/20190925fg/20190925fg_caseall.csv"
 #test_group = "saliency/case3/case3.csv"
 #test_group = "saliency/case4/case4.csv"
 
-exprimentalgroup = "expilfgft_caseall"
+#exprimentalgroup = "expilfgft_caseall"
 #exprimentalgroup = "expfcilfg_caseall"
 #exprimentalgroup = "expfcfgft_caseall"
-#exprimentalgroup = "expfcilft_caseall"
+exprimentalgroup = "expfcilft_caseall"
 
 
 image_datasets = {x: dataloading.SADataset(x, test_group,
                                           data_transforms[x])
                   for x in ['train', 'val']}
-dataloaders = {x: torch.utils.data.DataLoader(image_datasets[x], batch_size=1,
-                                             shuffle=True, num_workers=0)
+dataloaders = {x: torch.utils.data.DataLoader(image_datasets[x], batch_size=64,
+                                             shuffle=True, num_workers=3)
               for x in ['train', 'val']}
 dataset_sizes = {x: len(image_datasets[x]) for x in ['train', 'val']}
 #class_names = image_datasets['train'].classes
@@ -565,13 +565,15 @@ class arch3model(nn.Module):
         self.model_ft.fc = nn.Linear(num_ftrs, 19)
         self.model_ft = self.model_ft.to(device)
         
-        self.fc1 = nn.Linear(70, 50)
-        self.fc2 = nn.Linear(50, 2)
+        self.fc0 = nn.Linear(51, 76)
+        self.fc1 = nn.Linear(95, 32)
+        self.fc2 = nn.Linear(32, 2)
         
     def forward(self, image, proprioception):
         outof_resnet18 = self.model_ft(image) #outof_resnet18.size() torch.Size([64, 19])
         #pro = proprioception
         
+        proprioception = self.fc0(proprioception)
         x = torch.cat((outof_resnet18, proprioception), dim=1)
         x = F.relu(self.fc1(x)) #x.size() torch.Size([64, 70])
         x = self.fc2(x)
@@ -785,10 +787,10 @@ if __name__ == "__main__":
 
     if train_mode == True:
         model_arc3 = train_model(model_arc3, criterion, optimizer_ft, exp_lr_scheduler, num_epochs=25)
-        torch.save(model_arc3.state_dict(), "modelstate/model_arc3_save_20190925_exp"+dataset_group+".pth")
+        torch.save(model_arc3.state_dict(), "modelstate/model_arc3v1_save_20190925_exp"+dataset_group+".pth")
     else:
-        state_dict = torch.load("modelstate/model_arc3_save_20190925_"+ exprimentalgroup +".pth")
-        print("load state : modelstate/model_arc3_save_20190925_"+ exprimentalgroup +".pth")
+        state_dict = torch.load("modelstate/model_arc3v1_save_20190925_"+ exprimentalgroup +".pth")
+        print("load state : modelstate/model_arc3v1_save_20190925_"+ exprimentalgroup +".pth")
         testmodel = arch3model()
         testmodel.load_state_dict(state_dict)
         testmodel.eval()
@@ -800,11 +802,12 @@ if __name__ == "__main__":
     #visualize_model(testmodel)
 
     # generate confusion matrix and ROC.
-    #accuracy(testmodel)
+    accuracy(testmodel)
+    #######################################accuracy(model_arc3.to(device))
 
     # visualise using flashtorch (saliency maps)
     # works only with "batch_size=1 and num_workers=0"
-    visualise_max_gradient(testmodel)
+    #visualise_max_gradient(testmodel)
 
     # activation maximization, get a patterns
     #show_activation(testmodel)
