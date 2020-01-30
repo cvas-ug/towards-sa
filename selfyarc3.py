@@ -80,8 +80,36 @@ data_transforms = {
 #                                          data_transforms[x])
 #                  for x in ['train', 'val']}
 
+#Training and evaluation dict:
+#raning_and_evaluation = {"train_mode": True, "test_group": None, "dataset_group":"ilfgft", "exprimentalgroup": "exp1ilfgft"}
+
+#Testing all cases (combined)
+#test_combined = {"train_mode": False, "test_group": "20190925unseen/20190925fc/20190925fc_caseall.csv", "dataset_group": "ilfgft_caseall", "exprimentalgroup": "expilfgft_caseall" }
+
+#Testing all cases (separate)
+# activate/deactivate to test  
+# todo: sub dict and iterate
+#selfydataset = {"train_mode" : False, "test_group": "20190925unseen/20190925fc/20190925fc_case1.csv", "dataset_group": "ilfgft_caseall", "exprimentalgroup": "expilfgft_caseall"}
+#selfydataset = {"train_mode" : False, "test_group": "20190925unseen/20190925fc/20190925fc_case2.csv", "dataset_group": "ilfgft_caseall", "exprimentalgroup": "expilfgft_caseall"}
+#selfydataset = {"train_mode" : False, "test_group": "20190925unseen/20190925fc/20190925fc_case3.csv", "dataset_group": "ilfgft_caseall", "exprimentalgroup": "expilfgft_caseall"}
+#selfydataset = {"train_mode" : False, "test_group": "20190925unseen/20190925fc/20190925fc_case4.csv", "dataset_group": "ilfgft_caseall", "exprimentalgroup": "expilfgft_caseall"}
+
+#selfydataset = {"train_mode" : False, "test_group": "20190925unseen/20190925ft/20190925ft_case1.csv", "dataset_group": "fcilfg_caseall", "exprimentalgroup": "expfcilfg_caseall"}
+#selfydataset = {"train_mode" : False, "test_group": "20190925unseen/20190925ft/20190925ft_case2.csv", "dataset_group": "fcilfg_caseall", "exprimentalgroup": "expfcilfg_caseall"}
+#selfydataset = {"train_mode" : False, "test_group": "20190925unseen/20190925ft/20190925ft_case3.csv", "dataset_group": "fcilfg_caseall", "exprimentalgroup": "expfcilfg_caseall"}
+#selfydataset = {"train_mode" : False, "test_group": "20190925unseen/20190925ft/20190925ft_case4.csv", "dataset_group": "fcilfg_caseall", "exprimentalgroup": "expfcilfg_caseall"}
+
+#selfydataset = {"train_mode" : False, "test_group": "20190925unseen/20190925il/20190925il_case1.csv", "dataset_group": "fcfgft_caseall", "exprimentalgroup": "expfcfgft_caseall"}
+#selfydataset = {"train_mode" : False, "test_group": "20190925unseen/20190925il/20190925il_case2.csv", "dataset_group": "fcfgft_caseall", "exprimentalgroup": "expfcfgft_caseall"}
+#selfydataset = {"train_mode" : False, "test_group": "20190925unseen/20190925il/20190925il_case3.csv", "dataset_group": "fcfgft_caseall", "exprimentalgroup": "expfcfgft_caseall"}
+#selfydataset = {"train_mode" : False, "test_group": "20190925unseen/20190925il/20190925il_case4.csv", "dataset_group": "fcfgft_caseall", "exprimentalgroup": "expfcfgft_caseall"}
+
+#selfydataset = {"train_mode" : False, "test_group": "20190925unseen/20190925fg/20190925fg_case1.csv", "dataset_group": "fcilft_caseall", "exprimentalgroup": "expfcilft_caseall"}
+#selfydataset = {"train_mode" : False, "test_group": "20190925unseen/20190925fg/20190925fg_case2.csv", "dataset_group": "fcilft_caseall", "exprimentalgroup": "expfcilft_caseall"}
+#selfydataset = {"train_mode" : False, "test_group": "20190925unseen/20190925fg/20190925fg_case3.csv", "dataset_group": "fcilft_caseall", "exprimentalgroup": "expfcilft_caseall"}
+selfydataset = {"train_mode" : False, "test_group": "20190925unseen/20190925fg/20190925fg_case4.csv", "dataset_group": "fcilft_caseall", "exprimentalgroup": "expfcilft_caseall"}
 # activate/deactivate training
-train_mode = False
+#train_mode = False
 
 # activate/deactivate testset
 #test_group = None
@@ -122,13 +150,13 @@ train_mode = False
 #dataset_group = "ilfgft_caseall"
 #dataset_group = "fcilfg_caseall"
 #dataset_group = "fcfgft_caseall"
-dataset_group = "fcilft_caseall"
+#dataset_group = "fcilft_caseall"
 
 # unseen test group with all cases
 #test_group = "20190925unseen/20190925fc/20190925fc_caseall.csv"
 #test_group = "20190925unseen/20190925ft/20190925ft_caseall.csv"
 #test_group = "20190925unseen/20190925il/20190925il_caseall.csv"
-test_group = "20190925unseen/20190925fg/20190925fg_caseall.csv"
+#test_group = "20190925unseen/20190925fg/20190925fg_caseall.csv"
 
 # unseen test group with separate cases
 #test_group = "20190925unseen/20190925fc/20190925fc_case1.csv"
@@ -159,10 +187,10 @@ test_group = "20190925unseen/20190925fg/20190925fg_caseall.csv"
 #exprimentalgroup = "expilfgft_caseall"
 #exprimentalgroup = "expfcilfg_caseall"
 #exprimentalgroup = "expfcfgft_caseall"
-exprimentalgroup = "expfcilft_caseall"
+#exprimentalgroup = "expfcilft_caseall"
 
 
-image_datasets = {x: dataloading.SADataset(x, test_group,
+image_datasets = {x: dataloading.SADataset(x, selfydataset["test_group"],
                                           data_transforms[x])
                   for x in ['train', 'val']}
 dataloaders = {x: torch.utils.data.DataLoader(image_datasets[x], batch_size=64,
@@ -184,10 +212,10 @@ torch.backends.cudnn.deterministic = True
 torch.backends.cudnn.benchmark = False
 
 print("Current seed: {}".format(current_seed))
-if test_group:
-    print("dataset     : " + dataset_group + " tested with "+ test_group )
+if selfydataset["test_group"]:
+    print("dataset     : " + selfydataset["dataset_group"] + " tested with "+ selfydataset["test_group"] )
 else:
-    print("dataset     : " + dataset_group)
+    print("dataset     : " + selfydataset["dataset_group"])
 
 
 def imshow(inp, title=None):
@@ -520,7 +548,7 @@ def accuracy(model):
 
 def confusionMatrix(cm, accuracy, total):
     target_names = ['Self', 'Environment']
-    title = "Confusion Matrix Arch3" + ':Accuracy ={} on total of batch {}'.format(accuracy, total)
+    title = "CM Arch3" + ':Accuracy ={} on total of batch {}'.format(accuracy, total)
     cmap = "Greens"
     from matplotlib.ticker import MultipleLocator
     if cmap is None:
@@ -543,10 +571,16 @@ def confusionMatrix(cm, accuracy, total):
     thresh = cm.max() / 1.5
     for i, j in itertools.product(range(cm.shape[0]), range(cm.shape[1])):
         plt.text(j, i, "{:,}".format(cm[i, j]),  ha="center", va="center", color="white" if cm[i, j] > thresh else "black")
-    plt.tight_layout()
+    
     plt.ylabel('True label', fontsize=12, color='blue')
     plt.xlabel('Predicted label', fontsize=12, color='blue')
-    plt.show()
+    prefix = './plots'
+    plt.tight_layout()
+    separate_group = (selfydataset["test_group"].split("/"))
+    separate_group = separate_group[2].split(".")
+    plt.savefig(add_prefix(prefix, 'CM_'+ selfydataset["dataset_group"] + '_' + separate_group[0] +'.png'))
+    plt.close()
+    #plt.show()
 
 def add_prefix(prefix, path):
     return os.path.join(prefix, path)
@@ -554,7 +588,7 @@ def add_prefix(prefix, path):
 def plt_roc(test_y, probas_y, prefix, plot_micro=False, plot_macro=False):
     assert isinstance(test_y, list) and isinstance(probas_y, list), 'the type of input must be list'
     skplt.metrics.plot_roc(test_y, probas_y, plot_micro=plot_micro, plot_macro=plot_macro)
-    plt.savefig(add_prefix(prefix, 'roc_auc_curve_'+ dataset_group +'.png'))
+    plt.savefig(add_prefix(prefix, 'roc_auc_curve_'+ selfydataset["dataset_group"] +'.png'))
     plt.close()
 
 class arch3model(nn.Module):
@@ -604,7 +638,7 @@ def visualise_max_gradient(testmodel):
         print(i)
         dirctory = "saliency/case4/"
         case = "1"
-        plt.savefig(dirctory+"train_"+exprimentalgroup+"_test"+case+str(i)+".png")
+        plt.savefig(dirctory+"train_"+selfydataset["exprimentalgroup"]+"_test"+case+str(i)+".png")
         plt.show()
         backprop.visualize(inputs, proprioceptionge, class_index, guided=True, use_gpu=True)
         plt.ioff()
@@ -641,12 +675,12 @@ def show_activation(testmodel):
     #g_ascent.visualize(conv2_1, conv2_1_filters, title="conv2_1") 
     #g_ascent.visualize(conv4_2, conv4_2_filters, title="conv4_2") 
     for filter_no in range(0,511):
-        output = g_ascent.visualize(conv4_2, filter_no, title=exprimentalgroup+"conv4_2", return_output=True)
+        output = g_ascent.visualize(conv4_2, filter_no, title=selfydataset["exprimentalgroup"]+"conv4_2", return_output=True)
         #print('num_iter:', len(output))
         #print('optimized image:', output[-1].shape)
         tensor_image = output[-1]
         tens = tensor_image
-        torchvision.utils.save_image(tens, add_prefix("filters/"+exprimentalgroup, exprimentalgroup+"filter"+str(filter_no)+".png"), normalize=True)
+        torchvision.utils.save_image(tens, add_prefix("filters/"+selfydataset["exprimentalgroup"], selfydataset["exprimentalgroup"]+"filter"+str(filter_no)+".png"), normalize=True)
     
     print("Generate ")
 
@@ -785,12 +819,12 @@ if __name__ == "__main__":
     """
     exp_lr_scheduler = lr_scheduler.StepLR(optimizer_ft, step_size=7, gamma=0.1)
 
-    if train_mode == True:
+    if selfydataset["train_mode"] == True:
         model_arc3 = train_model(model_arc3, criterion, optimizer_ft, exp_lr_scheduler, num_epochs=25)
-        torch.save(model_arc3.state_dict(), "modelstate/model_arc3v1_save_20190925_exp"+dataset_group+".pth")
+        torch.save(model_arc3.state_dict(), "modelstate/model_arc3v1_save_20190925_exp"+selfydataset["dataset_group"]+".pth")
     else:
-        state_dict = torch.load("modelstate/model_arc3v1_save_20190925_"+ exprimentalgroup +".pth")
-        print("load state : modelstate/model_arc3v1_save_20190925_"+ exprimentalgroup +".pth")
+        state_dict = torch.load("modelstate/model_arc3v1_save_20190925_"+ selfydataset["exprimentalgroup"] +".pth")
+        print("load state : modelstate/model_arc3v1_save_20190925_"+ selfydataset["exprimentalgroup"] +".pth")
         testmodel = arch3model()
         testmodel.load_state_dict(state_dict)
         testmodel.eval()

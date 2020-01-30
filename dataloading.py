@@ -20,6 +20,10 @@ torch.manual_seed(current_seed)
 torch.backends.cudnn.deterministic = True
 torch.backends.cudnn.benchmark = False
 
+# For training and evaluation dict:
+traning_and_evaluation = {"train_csv": "20190925ilfgft/train_caseall.csv", "eval_csv": "20190925ilfgft/eval_caseall.csv" } 
+
+
 ##########################################################################
 #
 # The following is the configuration for four groups experiments FC, IL, FG, FT
