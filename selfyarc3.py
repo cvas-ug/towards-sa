@@ -692,8 +692,8 @@ def get_module_weights(exprimentalgroup, layer):
     #optimizer_ft = optim.SGD(model_arc3.parameters(), lr=0.001, momentum=0.9)
     #exp_lr_scheduler = lr_scheduler.StepLR(optimizer_ft, step_size=7, gamma=0.1)
 
-    state_dict = torch.load("modelstate/model_arc3_save_20190925_"+ exprimentalgroup +".pth")
-    print("load state : modelstate/model_arc3_save_20190925_"+ exprimentalgroup +".pth")
+    state_dict = torch.load("modelstate/model_arc3v1_save_20190925_"+ exprimentalgroup +".pth")
+    print("load state : modelstate/model_arc3v1_save_20190925_"+ exprimentalgroup +".pth")
     loadedmodel = arch3model()
     loadedmodel.load_state_dict(state_dict)
     loadedmodel.eval()
@@ -776,6 +776,7 @@ def calculate_mutual_information(weights):
         
         nzs = pxy > 0 
         plt.ioff()
+        plt.tight_layout()
         plt.show()
         return np.sum(pxy[nzs] * np.log(pxy[nzs] / px_py[nzs]))
 
@@ -836,7 +837,7 @@ if __name__ == "__main__":
     #visualize_model(testmodel)
 
     # generate confusion matrix and ROC.
-    accuracy(testmodel)
+    #accuracy(testmodel)
     #######################################accuracy(model_arc3.to(device))
 
     # visualise using flashtorch (saliency maps)
@@ -847,19 +848,19 @@ if __name__ == "__main__":
     #show_activation(testmodel)
 
     # get weights of saved states
-    #exprimentalgroups = ["expilfgft_caseall", "expfcilfg_caseall", "expfcfgft_caseall", "expfcilft_caseall"]
-    #all_weights = []
-    #for exprimentgroup in exprimentalgroups:
-    #    weights = get_module_weights(exprimentgroup, layer="fc2")
-    #    all_weights.append(weights)
+    exprimentalgroups = ["expilfgft_caseall", "expfcilfg_caseall", "expfcfgft_caseall", "expfcilft_caseall"]
+    all_weights = []
+    for exprimentgroup in exprimentalgroups:
+        weights = get_module_weights(exprimentgroup, layer="fc2")
+        all_weights.append(weights)
     #with open("fc0_all_group_weights.pkl", "wb") as p:
     #    pickle.dump(all_weights, p)
     #with open("fc0_all_group_weights.pkl", "rb") as p:
     #    ww = pickle.load(p)
     # calculate mutual information, and plot mutul info table
-    #mutual_info = calculate_mutual_information(all_weights)
-    #plot_table(mutual_info)
+    mutual_info = calculate_mutual_information(all_weights)
+    plot_table(mutual_info)
 
     
-    plt.ioff()
-    plt.show()
+    #plt.ioff()
+    #plt.show()
