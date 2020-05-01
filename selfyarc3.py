@@ -84,7 +84,7 @@ data_transforms = {
 #raning_and_evaluation = {"train_mode": True, "test_group": None, "dataset_group":"ilfgft", "exprimentalgroup": "exp1ilfgft"}
 
 #Testing all cases (combined)
-#test_combined = {"train_mode": False, "test_group": "20190925unseen/20190925fc/20190925fc_caseall.csv", "dataset_group": "ilfgft_caseall", "exprimentalgroup": "expilfgft_caseall" }
+#selfydataset = {"train_mode": False, "test_group": "20190925unseen/20190925fc/20190925fc_caseall.csv", "dataset_group": "ilfgft_caseall", "exprimentalgroup": "expilfgft_caseall" }
 
 #Testing all cases (separate)
 # activate/deactivate to test  
@@ -629,23 +629,57 @@ def visualise_max_gradient(testmodel):
         #class_index = class_names.index('baxter')
         class_index = labels
 
+        #for prediction
+        model = testmodel
+        was_training = model.training
+        model.eval()
+        with torch.no_grad():
+            inputs = inputs.to(device)
+            labels = labels.to(device)
+            proprioception = tensorpro.to(device)
+
+            outputs = model(inputs, proprioception)
+            _, preds = torch.max(outputs, 1)
+
+            for j in range(inputs.size()[0]):
+                print('predicted: {}, label: {}'.format(preds.cpu().data[j], labels.cpu().data[j]))#class_names[preds[j]]))
+                if (preds.item()) == 0:
+                    prediction = "baxter"
+                else:
+                    prediction = "env"
+
+                if (preds == labels.data):
+                    print("correctly predicted")
+                else:
+                    print("wrong prediction")
+
         #Calculate the gradients of each pixel w.r.t. the input image
         #the maximum of the gradients for each pixel across colour channels.
-        backprop.visualize(inputs, proprioception, class_index, guided=True, use_gpu=False)
-        print(labels)
-        plt.ioff()
+        #backprop.visualize(inputs, proprioception, class_index, guided=True, use_gpu=False)
+        #print(labels)
+        #print(path)
+        #plt.ioff()
         i+=1
-        print(i)
-        dirctory = "saliency/case4/"
-        case = "1"
-        plt.savefig(dirctory+"train_"+selfydataset["exprimentalgroup"]+"_test"+case+str(i)+".png")
-        plt.show()
+        #print(i)
+        #dirctory = "saliency/case4/"
+        #change the below directory name as required:
+        dirctory = "saliency/modelv1g4_fg/"
+        case = "case4"
+        #plt.savefig(dirctory+"train_"+selfydataset["exprimentalgroup"]+"_test"+str(i)+"_"+prediction+".png")
+        #plt.show()
         backprop.visualize(inputs, proprioceptionge, class_index, guided=True, use_gpu=True)
-        plt.ioff()
-        plt.show()
+        #print(labels)
+        #print(path)
+        #plt.ioff()
+        plt.savefig(dirctory+"train_"+selfydataset["exprimentalgroup"]+"_test"+"_"+case+"_"+str(i)+"_"+prediction+".png")
+        #plt.show()
         backprop.visualize(inputsfrompath, proprioception, class_index, guided=True, use_gpu=True)
-        plt.ioff()
-        plt.show()
+        plt.savefig(dirctory+"train_"+selfydataset["exprimentalgroup"]+"_test"+"_"+case+"_"+str(i)+"_z_"+prediction+".png")
+        #print(labels)
+        #print(path)
+        #plt.ioff()
+        #plt.show()
+
 
 
 def show_activation(testmodel):
@@ -730,6 +764,7 @@ def get_module_weights(exprimentalgroup, layer):
     return weights
 
 def calculate_mutual_information(weights):
+    #Ref https://matthew-brett.github.io/teaching/mutual_information.html
     plt.rcParams['image.cmap'] = 'gray'
     plt.rcParams['image.interpolation'] = 'nearest'
     
@@ -832,6 +867,11 @@ if __name__ == "__main__":
         print(device)
         testmodel.to(device)
         
+    ##################################################
+    #
+    # Uncomment below function and the above dataset (dictionaries) as desire
+    #
+    ##################################################
 
     # show images with their predictions
     #visualize_model(testmodel)
@@ -842,24 +882,24 @@ if __name__ == "__main__":
 
     # visualise using flashtorch (saliency maps)
     # works only with "batch_size=1 and num_workers=0"
-    #visualise_max_gradient(testmodel)
+    visualise_max_gradient(testmodel)
 
     # activation maximization, get a patterns
     #show_activation(testmodel)
 
     # get weights of saved states
-    exprimentalgroups = ["expilfgft_caseall", "expfcilfg_caseall", "expfcfgft_caseall", "expfcilft_caseall"]
-    all_weights = []
-    for exprimentgroup in exprimentalgroups:
-        weights = get_module_weights(exprimentgroup, layer="fc2")
-        all_weights.append(weights)
+    #exprimentalgroups = ["expilfgft_caseall", "expfcilfg_caseall", "expfcfgft_caseall", "expfcilft_caseall"]
+    #all_weights = []
+    #for exprimentgroup in exprimentalgroups:
+    #    weights = get_module_weights(exprimentgroup, layer="fc2")
+    #    all_weights.append(weights)
     #with open("fc0_all_group_weights.pkl", "wb") as p:
     #    pickle.dump(all_weights, p)
     #with open("fc0_all_group_weights.pkl", "rb") as p:
     #    ww = pickle.load(p)
     # calculate mutual information, and plot mutul info table
-    mutual_info = calculate_mutual_information(all_weights)
-    plot_table(mutual_info)
+    #mutual_info = calculate_mutual_information(all_weights)
+    #plot_table(mutual_info)
 
     
     #plt.ioff()
