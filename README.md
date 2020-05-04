@@ -10,8 +10,16 @@ While humans are aware of their body and capabilities, robots are not. To addres
 
 ## Implementation details
 
-TODO
+* Module implemented with Pytorch.
+
+* We used the robot’s vision and proprioception capabilities as the sensory inputs for our approach. 
+
+* Vision comprises RGB images captured using a stereo ZED camera from Stereolabs configured to output images at 720p resolution. Captured images contain a representation of the robot’s arms or environment.
+
+* Proprioception consists of the robot’s joint states; being velocity, angular position, and motor torque. 
+
+* Form four cases experimental cases, and follow the leave-one-out cross-validation strategy to test the trained model.
 
 ## Results
 
-TODO
+A robot can differentiate itself from the environment with an average classification accuracy of 88.7% using unseen test samples and across four different scenes’ groups.
