@@ -18,8 +18,10 @@ While humans are aware of their body and capabilities, robots are not. To addres
 
 * Proprioception consists of the robot’s joint states; being velocity, angular position, and motor torque. 
 
-* Form four cases experimental cases, and follow the leave-one-out cross-validation strategy to test the trained model.
+* Form four experimental cases, and follow the leave-one-out cross-validation strategy to test the trained model.
 
-## Results
+* To reproduce/experimenting the results:
 
-A robot can differentiate itself from the environment with an average classification accuracy of 88.7% using unseen test samples and across four different scenes’ groups.
+* Download dataset fron the following link :
+
+* Edit "selfyarch" file and select the required parameters by uncommenting the dictionaries for training and/or test unseen data.
