@@ -22,6 +22,6 @@ While humans are aware of their body and capabilities, robots are not. To addres
 
 * To reproduce/experimenting the results:
 
-* Download dataset fron the following link :
+  * Download dataset fron the following link :
 
-* Edit "selfyarch" file and select the required parameters by uncommenting the dictionaries for training and/or test unseen data.
+  * Edit "selfyarch" file and select the required parameters by uncommenting the dictionaries for training and/or test unseen data.
