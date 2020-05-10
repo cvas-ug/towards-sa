@@ -24,4 +24,6 @@ While humans are aware of their body and capabilities, robots are not. To addres
 
   * Download dataset from the following link :
 
+  * Put the dataset file togather: "cat sadataset.tar* > sadataset.tar" then untar the dataset.
+
   * Edit "selfyarch" file and select the required parameters by uncommenting the dictionaries for training and/or test unseen data.
