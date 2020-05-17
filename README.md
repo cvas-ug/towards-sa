@@ -10,8 +10,20 @@ While humans are aware of their body and capabilities, robots are not. To addres
 
 ## Implementation details
 
-TODO
+* Module implemented with Pytorch.
 
-## Results
+* We used the robot’s vision and proprioception capabilities as the sensory inputs for our approach. 
 
-TODO
+* Vision comprises RGB images captured using a stereo ZED camera from Stereolabs configured to output images at 720p resolution. Captured images contain a representation of the robot’s arms or environment.
+
+* Proprioception consists of the robot’s joint states; being velocity, angular position, and motor torque. 
+
+* Form four experimental cases, and follow the leave-one-out cross-validation strategy to test the trained model.
+
+* To reproduce/experimenting the results:
+
+  * Download dataset from the following link :
+
+  * Put the dataset file togather: "cat sadataset.tar* > sadataset.tar" then untar the dataset.
+
+  * Edit "selfyarch" file and select the required parameters by uncommenting the dictionaries for training and/or test unseen data.
