@@ -1,7 +1,7 @@
 flashtorch==0.1.0
 imageio==2.5.0
 matplotlib==3.1.1
-numpy==1.16.2
+numpy==1.22.0
 pandas==0.25.1
 Pillow==5.4.1
 PyYAML==3.13
